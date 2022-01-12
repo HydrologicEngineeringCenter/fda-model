@@ -10,10 +10,10 @@ namespace ead{
         private const double THRESHOLD_DAMAGE_PERCENT = 0.05;
         private const double THRESHOLD_DAMAGE_RECURRENCE_INTERVAL = 0.01;
         private const int DEFAULT_THRESHOLD_ID = 0;
-        private IDistribution _frequency_flow;
+        private IDistribution _frequency_flow; //frequencies must be non-exceedance (cumulative) probabilities 
         private UncertainPairedData _inflow_outflow;
         private UncertainPairedData _flow_stage;
-        private UncertainPairedData _frequency_stage;
+        private UncertainPairedData _frequency_stage; //frequencies must be non-exceedance (cumulative) probabilities 
         private UncertainPairedData _channelstage_floodplainstage;
         private UncertainPairedData _levee_curve;
         private List<UncertainPairedData> _damage_category_stage_damage;
