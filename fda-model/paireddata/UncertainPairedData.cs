@@ -40,7 +40,7 @@ namespace paireddata
         public UncertainPairedData(double[] xs, IDistribution[] ys, string xlabel, string ylabel, string name, string description, int id)
         {
             _xvals = xs;
-            _yvals = MakeMeMonotonic(ys);
+            _yvals = ys;
             Category = "Default";
             IsNull = false;
             XLabel = xlabel;
@@ -51,7 +51,7 @@ namespace paireddata
         }
         public UncertainPairedData(double[] xs, IDistribution[] ys, string xlabel, string ylabel, string name, string description, int id, string category){
             _xvals = xs;
-            _yvals = MakeMeMonotonic(ys);
+            _yvals = ys;
             Category = category;
             IsNull = false;
             XLabel = xlabel;
@@ -69,30 +69,19 @@ namespace paireddata
         /// This is not the complete solution. 
         /// /// </summary>
         /// <param name="ys"></param> The array of IDistributions 
-        private IDistribution[] MakeMeMonotonic(IDistribution[] ys)
+        public UncertainPairedData MakeMeMonotonic()
         {
-            //I think we need to check for strict increasing at the top and strict increasing at the bottom 
-            //why?
-            //it is possible that the relative increase in standard error is so large that the .05 quantile for non-exceedance prob .05 is less than the .05 quantile 
-            //for non-exceedance prob .01 but the .95 quantile for the non-exceedance prob .05 is greater than the .95 quantile for non-exceedance prob .01
-            //it is also possible that the decrease in standard error is so large that the converse is true 
-            //so this has to be handled whether standard error increased or decreased, but in either case, the standard error will be held constant which will 
-            //ensure strict increasing monotonic 
-            //so really we can just compare the .05 and .95 quantiles 
-            //I don't think we need to handle truncated distributions differently 
-            //as long as the second min is greater than the first min,
-
-            IDistribution[] retval = new IDistribution[ys.Length];
-            switch (ys[0].Type)
+            IDistribution[] monotonicYDistributions = new IDistribution[_yvals.Length];
+            switch (_yvals[0].Type)
             {
                 case IDistributionEnum.Normal:
                     {
-                        retval = IAmNormalMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmNormalMakeMeMonotonic(_yvals);
                         break;
                     }
                 case IDistributionEnum.LogNormal:
                     {
-                        retval = IAmNormalMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmNormalMakeMeMonotonic(_yvals);
                         break;
                     }
                 case IDistributionEnum.NotSupported:
@@ -101,38 +90,38 @@ namespace paireddata
                     }
                 case IDistributionEnum.Triangular:
                     {
-                        retval = IAmTriangularMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmTriangularMakeMeMonotonic(_yvals);
                         break;
                     }
                 case IDistributionEnum.TruncatedNormal:
                     {
-                        retval = IAmNormalMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmNormalMakeMeMonotonic(_yvals);
                         break;  
                     } 
                 case IDistributionEnum.TruncatedTriangular:
                     {
-                        retval = IAmTriangularMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmTriangularMakeMeMonotonic(_yvals);
                         break;
                     }
                 case IDistributionEnum.TruncatedUniform:
                     {
-                        retval = IAmUniformMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmUniformMakeMeMonotonic(_yvals);
                         break;
                     }
                 case IDistributionEnum.Uniform:
                     {
-                        retval = IAmUniformMakeMeMonotonic(ys);
+                        monotonicYDistributions = IAmUniformMakeMeMonotonic(_yvals);
                         break;
                     }
             }
-            return retval;
+            return new UncertainPairedData(_xvals, monotonicYDistributions, XLabel, YLabel, Name, Description, ID);
         }
 
         public IDistribution[] IAmNormalMakeMeMonotonic(IDistribution[] distributionArray)
         {
             IDistribution[] monotonicDistributionArray = new IDistribution[distributionArray.Length];
-            double lowerBoundNonExceedanceProbability = 0.05;
-            double upperBoundNonExceedanceProbability = 0.95;
+            double lowerBoundNonExceedanceProbability = 0.0001;
+            double upperBoundNonExceedanceProbability = 1-lowerBoundNonExceedanceProbability;
             double lowerBoundFirstDistribution;
             double lowerBoundSecondDistribution;
             double upperBoundFirstDistribution;
