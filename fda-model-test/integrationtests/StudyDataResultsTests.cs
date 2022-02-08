@@ -18,7 +18,6 @@ namespace fda_model_test
 
         /// <summary>
         /// The expected values in this test class were computed using HEC-FDA Version 1.4.3
-        /// Let's plan on commenting out the tests below that take a long time to run, but not delete so that we may check from time to time
         /// </summary>
         /// 
 
@@ -71,7 +70,10 @@ namespace fda_model_test
             new Deterministic(1)
         };
 
-
+        /// <summary>
+        /// Study data for the below test can be obtained at https://docs.google.com/spreadsheets/d/1iSSQHjxlyKbtqfq1s3-RG_t4W19QZCiW/edit?usp=sharing&ouid=105470256128470573157&rtpof=true&sd=true
+        /// </summary>
+        /// <param name="expected"></param>
         [Theory]
         [InlineData(20.74)]
         public void ComputeMeanEAD_Test(double expected)
@@ -91,7 +93,12 @@ namespace fda_model_test
             double relativeDifference = difference / expected;
             Assert.True(relativeDifference < .016);
         }
-
+        /// <summary>
+        /// Study data for the below test can be obtained at https://docs.google.com/spreadsheets/d/1iSSQHjxlyKbtqfq1s3-RG_t4W19QZCiW/edit?usp=sharing&ouid=105470256128470573157&rtpof=true&sd=true
+        /// </summary>
+        /// <param name="iterations"></param>
+        /// <param name="seed"></param>
+        /// <param name="expected"></param>
         [Theory]
         [InlineData(10000,2345,21.09)]
         public void ComputeMeanEADWithIterations_Test(int iterations, int seed, double expected)
@@ -115,7 +122,14 @@ namespace fda_model_test
             double relativeDifference = Math.Abs(difference / expected);
             Assert.True(relativeDifference < .015);
         }
-
+        /// <summary>
+        /// Study data for the below test can be obtained at https://drive.google.com/file/d/1Wci-Kno92kb32sBwg-CeUniyHf7YVzel/view?usp=sharing
+        /// </summary>
+        /// <param name="iterations"></param>
+        /// <param name="seed"></param>
+        /// <param name="expectedEAD"></param>
+        /// <param name="topOfLeveeElevation"></param>
+        /// <param name="meanExpectedAEP"></param>
         [Theory]
         [InlineData(10000, 2345, 19.46, 475, .2487)]
         public void ComputeMeanEADAndPerformanceWithIterationsAndLevee_Test(int iterations, int seed, double expectedEAD, double topOfLeveeElevation, double meanExpectedAEP)
@@ -153,7 +167,14 @@ namespace fda_model_test
             double meanActualAEP = results.PerformanceByThresholds.ThresholdsDictionary[0].ProjectPerformanceResults.MeanAEP();
             Assert.Equal(meanExpectedAEP, meanActualAEP, 2);
         }
-
+        /// <summary>
+        /// Study data for the below test can be obtained at https://drive.google.com/file/d/1_n39h-ZR0I_5CvIJFBBoOCpJ2amqQlHA/view?usp=sharing
+        /// </summary>
+        /// <param name="iterations"></param>
+        /// <param name="seed"></param>
+        /// <param name="expectedEAD"></param>
+        /// <param name="topOfLeveeElevation"></param>
+        /// <param name="meanExpectedAEP"></param>
         [Theory]
         [InlineData(10000, 2345, 20.63, 475, .4225)]
         public void ComputeMeanEADAndPerformanceWithIterationsAndLeveeAndFragility_Test(int iterations, int seed, double expectedEAD, double topOfLeveeElevation, double meanExpectedAEP)

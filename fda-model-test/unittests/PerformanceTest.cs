@@ -109,7 +109,12 @@ namespace fda_model_test
             Assert.True(relativeDifference < .02);
         }
 
-
+        /// <summary>
+        /// Calculations for the below unit test can be obtained at https://docs.google.com/spreadsheets/d/1iSSQHjxlyKbtqfq1s3-RG_t4W19QZCiW/edit?usp=sharing&ouid=105470256128470573157&rtpof=true&sd=true
+        /// </summary>
+        /// <param name="thresholdValue"></param>
+        /// <param name="years"></param>
+        /// <param name="expected"></param>
         [Theory]
         [InlineData(30, 10, .095618)]
         [InlineData(35, 30, .113293)]
@@ -139,7 +144,11 @@ namespace fda_model_test
             Assert.True(relativeDifference < .02);
         }
 
-
+        /// <summary>
+        /// Calculations for the below test can be obtained at https://docs.google.com/spreadsheets/d/1iSSQHjxlyKbtqfq1s3-RG_t4W19QZCiW/edit?usp=sharing&ouid=105470256128470573157&rtpof=true&sd=true
+        /// </summary>
+        /// <param name="thresholdValue"></param>
+        /// <param name="expected"></param>
         [Theory]
         [InlineData(45,.026)]
         public void ComputeLeveeAEP_Test(double thresholdValue, double expected)
@@ -170,6 +179,14 @@ namespace fda_model_test
             Assert.True(relativeDifference < .02);
         }
 
+        /// <summary>
+        /// Calculations for the below test are available at https://docs.google.com/spreadsheets/d/1ui_sPDAleoYyu-T3fgraY5ye-WAMVs_j/edit?usp=sharing&ouid=105470256128470573157&rtpof=true&sd=true
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <param name="iterations"></param>
+        /// <param name="thresholdValue"></param>
+        /// <param name="recurrenceInterval"></param>
+        /// <param name="expected"></param>
         [Theory]
         [InlineData(3456,10000,28.75,.1,.8054)]
         [InlineData(5678, 10000, 100, .02, .998)]
