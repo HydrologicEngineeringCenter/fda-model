@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FB437B59-906E-4D22-B55D-63BC52FFD63E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>fda_hydro</RootNamespace>
+    <AssemblyName>fda-hydro</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="H5Assist, Version=6.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>6.2 (RasMapperLib Distro)\H5Assist.dll</HintPath>
+    </Reference>
+    <Reference Include="RasMapperLib, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>6.2 (RasMapperLib Distro)\RasMapperLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="hydraulics\HydraulicDataset.cs" />
+    <Compile Include="hydraulics\HydraulicDataType.cs" />
+    <Compile Include="hydraulics\HydraulicPoint.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="6.2 %28RasMapperLib Distro%29\bin64\hdf5.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\bin64\hdf5_hl.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\bin64\Hec.Dss.Native.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\bin64\szip.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\bin64\zlib.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\BitMiracle.LibTiff.NET.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\clipper_library.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\expat.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdal302.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdaladdo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalbuildvrt.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalconst_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdaldem.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalenhance.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdallocationinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalmanage.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalserver.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalsrsinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdaltindex.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdaltransform.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdalwarp.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdal_contour.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdal_grid.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdal_rasterize.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdal_translate.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gdal_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gnmanalyse.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\gnmmanage.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\h5nc.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\h5nc_hl.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\libcurl.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\nearblack.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\netcdf.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\ogr2ogr.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\ogrinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\ogrlineref.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\ogrtindex.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\ogr_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\osr_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\sqlite3.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\testepsg.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin32\zlib1.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\expat.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdal302.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdaladdo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalbuildvrt.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalconst_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdaldem.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalenhance.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdallocationinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalmanage.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalserver.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalsrsinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdaltindex.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdaltransform.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdalwarp.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdal_contour.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdal_grid.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdal_rasterize.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdal_translate.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gdal_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gnmanalyse.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\gnmmanage.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\h5nc.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\h5nc_hl.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\libcurl.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\nearblack.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\netcdf.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\ogr2ogr.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\ogrinfo.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\ogrlineref.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\ogrtindex.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\ogr_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\osr_wrap.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\sqlite3.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\testepsg.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\bin64\zlib1.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\bag_template.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gdalicon.png" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\GDALLogoBW.svg" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\GDALLogoColor.svg" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\GDALLogoGS.svg" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gmlasconf.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gml_registry.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\LICENSE.TXT" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\nitf_spec.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\pci_datum.txt" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\pci_ellips.txt" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\pds4_template.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\vdv452.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS NatGeo World Map.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS Ocean Basemap.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS USA Topo Maps.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS World Imagery.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS World Physical Map.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS World Shaded Relief.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS World Street Map.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS World Terrain Base.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\ArcGIS World Topo Map.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\Bing Satellite.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\Google Hybrid.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\Google Map.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\Google Satellite.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\Google Terrain Streets Water.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\Google Terrain.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\OpenStreetMaps.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\USGS Imagery.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\GDAL\common\Web Map Services\USGS Topo.xml" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\Geospatial.Core.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\Geospatial.GDALAssist.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\Geospatial.IO.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\Geospatial.Rendering.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\H5Assist.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\HDF.PInvoke.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\Hec.Dss.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\OxyPlot.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\OxyPlot.WindowsForms.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\ParticleTracking.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\PipeClient.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\PipeServer.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\RasMapperLib.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\RasProcess.exe" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\readme.txt" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\SharpDX.Direct2D1.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\SharpDX.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\SharpDX.DXGI.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\SQLite.Interop.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\System.Data.SQLite.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\TiffAssist.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\TiffBinaryReader.dll" />
+    <Content Include="6.2 %28RasMapperLib Distro%29\Utility.Core.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\cubewerx_extra.wkt" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\default.rsc" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ecw_cs.wkt" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\eedaconf.json" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\epsg.wkt" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\esri_StatePlane_extra.wkt" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gdalvrt.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gmlasconf.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gt_datum.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\gt_ellips.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\header.dxf" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\inspire_cp_BasicPropertyUnit.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\inspire_cp_CadastralBoundary.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\inspire_cp_CadastralParcel.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\inspire_cp_CadastralZoning.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_AdmArea.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_AdmBdry.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_AdmPt.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_BldA.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_BldL.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_Cntr.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_CommBdry.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_CommPt.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_Cstline.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_ElevPt.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_GCP.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_LeveeEdge.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RailCL.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RdArea.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RdASL.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RdCompt.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RdEdg.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RdMgtBdry.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RdSgmtA.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_RvrMgtBdry.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_SBAPt.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_SBArea.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_SBBdry.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_WA.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_WL.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_WStrA.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\jpfgdgml_WStrL.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\netcdf_config.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\nitf_spec.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ogrvrt.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\osmconf.ini" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ozi_datum.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ozi_ellips.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\pdfcomposition.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\plscenesconf.json" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\proj.db" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ruian_vf_ob_v1.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ruian_vf_st_uvoh_v1.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ruian_vf_st_v1.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\ruian_vf_v1.gfs" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\s57agencies.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\s57attributes.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\s57expectedinput.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\s57objectclasses.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\seed_2d.dgn" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\seed_3d.dgn" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\stateplane.csv" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\trailer.dxf" />
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\common\data\vdv452.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="6.2 %28RasMapperLib Distro%29\GDAL\EnvironmentInit.bat" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
