@@ -3,56 +3,86 @@ using RasMapperLib.Mapping;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace fda_model.hydraulics
+namespace fda_hydro.hydraulics
 {
+    // Class needs to
+    // get hydraulic data for a point and save it into an object
+    // assign values from the point shapefile to the object
+    // check which element of a polygon shapefile each structure belongs to, and save that to the object
+    //
+    //Also need to handle both grids and hdf. 
+    //
+
     public class HydraulicDataset
 {
-        private HydraulicPoint[] _points;
-        public HydraulicPoint[] Points { get; }
+        
+        private string _terrainFile;
+        private string _structureInventoryFile;
+        private string _impactAreasFile;
 
-        public string terrainFile;
-        public string structureInventoryFile;
-        public IList<string> resultFiles;
-
-        public void GetHydraulicDataForSI()
+        public HydraulicDataset(string terrain, string structureInventoryFile, string impactAreasFile)
         {
-            var structureInventory = new PointFeatureLayer("Structure_Inventory", structureInventoryFile);
-            var terrain = new TerrainLayer("Terrain", terrainFile);
+            _terrainFile = terrain;
+            _structureInventoryFile = structureInventoryFile;
+            _impactAreasFile = impactAreasFile;
+        }
+
+        public HydraulicPoint[] GetHydraulicDataFromUnsteadyHDFs(Dictionary<string, double> resultFileProbability)
+        {
+            var structureInventory = new PointFeatureLayer("Structure_Inventory", _structureInventoryFile);
+            var terrain = new TerrainLayer("Terrain", _terrainFile);
+            var impactAreas = new PolygonFeatureLayer("Impact_Areas", _impactAreasFile);
             PointMs pts = new PointMs(structureInventory.Points().Select(p => p.PointM()));
-            float[] ptElevs = terrain.ComputePointElevations(pts);
+            float[] terrainElevs = terrain.ComputePointElevations(pts);
 
             //Create containing objects
-            _points = new HydraulicPoint[ptElevs.Length];
+            HydraulicPoint[] points = new HydraulicPoint[terrainElevs.Length];
 
             //Fill Terrains
-            for (int i = 0; i < ptElevs.Length; i++)
+            for (int i = 0; i < terrainElevs.Length; i++)
             {
-                _points[i].terrainElevation = ptElevs[i];
+                points[i] = new HydraulicPoint();
+                points[i].terrainElevation = terrainElevs[i];
             }
 
-            foreach (var result in resultFiles)
+            //Assign Impact Area
+            for(int i = 0; i < points.Length; i++)
+            {
+                var pgons = impactAreas.Polygons();
+                foreach(var pgon in pgons)
+                {
+                    if (pgon.Contains(pts[i]))
+                    {
+                        points[i].ImpactArea = "Good enough for now.";
+                    }
+                }
+            }
+            foreach (var result in resultFileProbability)
             {
                 // Construct a result from the given filename.
-                var res = new RASResults(result);
-                var geo = res.Geometry;
-                var wsMap = new RASResultsMap(res, MapTypes.Elevation);
+                var rasResult = new RASResults(result.Key);
+                var rasGeometry = rasResult.Geometry;
+                var rasWSMap = new RASResultsMap(rasResult, MapTypes.Elevation);
+                var rasWSMap = new RASResultsMap()
 
                 // Sample the geometry for the given points loaded from the shapefile.
                 // If the geometry is the same for all of the results, we can actually reuse this object.
                 // (It's pretty fast to recompute though, so I wouldn't bother)
-                RASGeometryMapPoints mapPixels = geo.MapPixels(pts);
+                RASGeometryMapPoints mapPixels = rasGeometry.MapPixels(pts);
 
                 // This will produce -9999 for NoData values.
                 float[] wsValues = null;
-                res.ComputeSwitch(wsMap, mapPixels, RASResultsMap.MaxProfileIndex, ptElevs, null, ref wsValues);
+                rasResult.ComputeSwitch(rasWSMap, mapPixels, RASResultsMap.MaxProfileIndex, terrainElevs, null, ref wsValues);
 
-                for (int i = 0; i < ptElevs.Length; i++)
+                for (int i = 0; i < terrainElevs.Length; i++)
                 {
-                    _points[i].hydraulicResults.Add(res.Name, wsValues[i]);
+                    points[i].probabilityValue.Add(result.Value, wsValues[i]);
                 }
             }
+            return points;
         }
     }
+
 
    
 }
