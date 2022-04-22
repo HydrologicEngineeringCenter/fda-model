@@ -2,18 +2,26 @@
 {
     public class DeterministicStructure
     {
-        private string name;
+        private string _name;
         private double _foundationHeight;
         private double _StructureValue;
         private double _ContentValue;
         private double _OtherValue;
         private DeterministicOccupancyType _occtype;
-        public double ComputeDamage(double depth)
+
+        public DeterministicStructure(string name, double structValueSample, double foundHeightSample)
+        {
+            _name = name;
+            _StructureValue = structValueSample;
+            _foundationHeight = foundHeightSample;
+        }
+
+        public StructureDamageResult ComputeDamage(double depth)
         {
             double depthabovefoundHeight = depth - _foundationHeight;
             double structDamagepercent = _occtype.StructureDamageFunction.f(depthabovefoundHeight);
-
-            return structDamagepercent * _StructureValue;
+            double structDamage = structDamagepercent * _StructureValue;
+            return new StructureDamageResult(structDamage,structDamage,structDamage);
         }
     }
 }

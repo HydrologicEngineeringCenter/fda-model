@@ -3,11 +3,18 @@ using System.Collections.Generic;
 
 namespace structures
 {
-    internal class OccupancyTypeSet
+    public class OccupancyTypeSet
     {
-        internal List<DeterministicOccupancyType> Sample(int v)
+        private IList<OccupancyType> _occtypes;
+        public List<DeterministicOccupancyType> Sample(int seed)
         {
-            throw new NotImplementedException();
+            Random random = new Random(seed);
+            List<DeterministicOccupancyType> sample = new List<DeterministicOccupancyType>();
+            foreach(OccupancyType oc in _occtypes)
+            {
+                sample.Add(oc.Sample(random.Next()));
+            }
+            return sample;
         }
     }
 }

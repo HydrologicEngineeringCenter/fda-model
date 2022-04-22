@@ -26,7 +26,7 @@ namespace structures
             double foundHeightSample = _foundationHeightMean + (_foundationHeightMean * occtype.FoundationHeightError);
             double structValueSample = _StructureValue.InverseCDF(random.NextDouble());
             //load up the deterministic structure
-            return new DeterministicStructure();
+            return new DeterministicStructure(name,structValueSample,foundHeightSample);
         }
 
     }
