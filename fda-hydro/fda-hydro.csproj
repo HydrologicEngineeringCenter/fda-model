@@ -16,4 +16,8 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="structures\" />
+  </ItemGroup>
+
 </Project>

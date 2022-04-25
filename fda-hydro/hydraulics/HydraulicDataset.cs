@@ -29,10 +29,22 @@ namespace fda_hydro.hydraulics
 
         public HydraulicPoint[] GetHydraulicDataFromUnsteadyHDFs(Dictionary<string, double> resultFileProbability)
         {
-            var structureInventory = new PointFeatureLayer("Structure_Inventory", _structureInventoryFile);
-            var terrain = new TerrainLayer("Terrain", _terrainFile);
-            var impactAreas = new PolygonFeatureLayer("Impact_Areas", _impactAreasFile);
-            PointMs pts = new PointMs(structureInventory.Points().Select(p => p.PointM()));
+            //create feature layers for the standard inputs
+            PointFeatureLayer structureInventory = new PointFeatureLayer("Structure_Inventory", _structureInventoryFile);
+            TerrainLayer terrain = new TerrainLayer("Terrain", _terrainFile);
+            PolygonFeatureLayer impactAreas = new PolygonFeatureLayer("Impact_Areas", _impactAreasFile);
+
+            //get individual points out of the SI feature layer as a list
+            IEnumerable<Point> sIPoints = structureInventory.Points();
+
+            //change those points to point Ms because that's what RASMapper wants to work with
+            PointMs pts = new PointMs();
+            foreach(Point point in sIPoints)
+            {
+                pts.Add(point.PointM());
+            }
+
+            // get terrain elevations
             float[] terrainElevs = terrain.ComputePointElevations(pts);
 
             //Create containing objects
@@ -63,7 +75,6 @@ namespace fda_hydro.hydraulics
                 var rasResult = new RASResults(result.Key);
                 var rasGeometry = rasResult.Geometry;
                 var rasWSMap = new RASResultsMap(rasResult, MapTypes.Elevation);
-                var rasWSMap = new RASResultsMap()
 
                 // Sample the geometry for the given points loaded from the shapefile.
                 // If the geometry is the same for all of the results, we can actually reuse this object.
