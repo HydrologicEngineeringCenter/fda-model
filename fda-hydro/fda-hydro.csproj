@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>net48</TargetFramework>
+	  <OutputPath>..\Build\FDA2.0</OutputPath>
+	  <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="H5Assist">
+      <HintPath>6.2 (RasMapperLib Distro)\H5Assist.dll</HintPath>
+    </Reference>
+    <Reference Include="RasMapperLib">
+      <HintPath>6.2 (RasMapperLib Distro)\RasMapperLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="structures\" />
+  </ItemGroup>
+
+</Project>
