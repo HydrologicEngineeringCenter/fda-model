@@ -14,67 +14,35 @@ namespace fda_hydro.hydraulics
     //
 
     public class HydraulicDataset
-{
-        
+    {
+        //relies on result files and probabilities being linked by index.
         private string _terrainFile;
-        private string _structureInventoryFile;
-        private string _impactAreasFile;
+        private string[] _resultFiles;
 
-        public HydraulicDataset(string terrain, string structureInventoryFile, string impactAreasFile)
+        public double[] Probabilities { get; set; }
+
+        public HydraulicDataset(string terrain, string[] resultFiles, double[] probabilities)
         {
             _terrainFile = terrain;
-            _structureInventoryFile = structureInventoryFile;
-            _impactAreasFile = impactAreasFile;
+            _resultFiles = resultFiles;
+            Probabilities = probabilities;
+
         }
 
-        public HydraulicPoint[] GetHydraulicDataFromUnsteadyHDFs(Dictionary<string, double> resultFileProbability)
+        public HydraulicPoint[] GetHydraulicDataFromUnsteadyHDFs(PointMs pts)
         {
+            HydraulicPoint[] hydropoints = new HydraulicPoint[pts.Count()];
             //create feature layers for the standard inputs
-            PointFeatureLayer structureInventory = new PointFeatureLayer("Structure_Inventory", _structureInventoryFile);
             TerrainLayer terrain = new TerrainLayer("Terrain", _terrainFile);
-            PolygonFeatureLayer impactAreas = new PolygonFeatureLayer("Impact_Areas", _impactAreasFile);
-
-            //get individual points out of the SI feature layer as a list
-            IEnumerable<Point> sIPoints = structureInventory.Points();
-
-            //change those points to point Ms because that's what RASMapper wants to work with
-            PointMs pts = new PointMs();
-            foreach(Point point in sIPoints)
-            {
-                pts.Add(point.PointM());
-            }
-
             // get terrain elevations
             float[] terrainElevs = terrain.ComputePointElevations(pts);
 
-            //Create containing objects
-            HydraulicPoint[] points = new HydraulicPoint[terrainElevs.Length];
-
-            //Fill Terrains
-            for (int i = 0; i < terrainElevs.Length; i++)
-            {
-                points[i] = new HydraulicPoint();
-                points[i].terrainElevation = terrainElevs[i];
-            }
-
-            //Assign Impact Area
-            for(int i = 0; i < points.Length; i++)
-            {
-                var pgons = impactAreas.Polygons();
-                foreach(var pgon in pgons)
-                {
-                    if (pgon.Contains(pts[i]))
-                    {
-                        points[i].ImpactArea = "Good enough for now.";
-                    }
-                }
-            }
-            foreach (var result in resultFileProbability)
+            foreach (var result in _resultFiles)
             {
                 // Construct a result from the given filename.
-                var rasResult = new RASResults(result.Key);
+                var rasResult = new RASResults(result);
                 var rasGeometry = rasResult.Geometry;
-                var rasWSMap = new RASResultsMap(rasResult, MapTypes.Elevation);
+                var rasWSMap = new RASResultsMap(rasResult, MapTypes.Depth);
 
                 // Sample the geometry for the given points loaded from the shapefile.
                 // If the geometry is the same for all of the results, we can actually reuse this object.
@@ -82,17 +50,20 @@ namespace fda_hydro.hydraulics
                 RASGeometryMapPoints mapPixels = rasGeometry.MapPixels(pts);
 
                 // This will produce -9999 for NoData values.
-                float[] wsValues = null;
-                rasResult.ComputeSwitch(rasWSMap, mapPixels, RASResultsMap.MaxProfileIndex, terrainElevs, null, ref wsValues);
-
-                for (int i = 0; i < terrainElevs.Length; i++)
+                float[] depthVals = null;
+                rasResult.ComputeSwitch(rasWSMap, mapPixels, RASResultsMap.MaxProfileIndex, terrainElevs, null, ref depthVals);
+                
+                //Fill in the depths
+                for(int i = 0; i < depthVals.Length; i++)
                 {
-                    points[i].probabilityValue.Add(result.Value, wsValues[i]);
+                    hydropoints[i].depths.Add(depthVals[i]);
                 }
             }
-            return points;
+            return hydropoints;
         }
+
     }
+}
 
 
    
