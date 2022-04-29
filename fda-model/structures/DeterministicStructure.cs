@@ -2,16 +2,16 @@
 {
     public class DeterministicStructure
     {
-        private string _name;
+        private int _fdid;
         private double _foundationHeight;
         private double _StructureValue;
         private double _ContentValue;
         private double _OtherValue;
         private DeterministicOccupancyType _occtype;
 
-        public DeterministicStructure(string name, double structValueSample, double foundHeightSample)
+        public DeterministicStructure(int name, double structValueSample, double foundHeightSample)
         {
-            _name = name;
+            _fdid = name;
             _StructureValue = structValueSample;
             _foundationHeight = foundHeightSample;
         }

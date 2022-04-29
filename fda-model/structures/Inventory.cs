@@ -21,34 +21,25 @@ namespace structures
         public Inventory(string pointShapefilePath)
         {
             PointFeatureLayer structureInventory = new PointFeatureLayer("Structure_Inventory", pointShapefilePath);
-            List<string> names = (List<string>)structureInventory.GetValuesFromColumn("fd_id").OfType<string>();
-            List<double> x = (List<double>) structureInventory.GetValuesFromColumn("x").OfType<double>();
-            List<double> y = (List<double>) structureInventory.GetValuesFromColumn("y").OfType<double>();
-            List<double> foundheight = (List<double>) structureInventory.GetValuesFromColumn("found_ht").OfType<double>();
-            List<double> valStructure = (List<double>) structureInventory.GetValuesFromColumn("val_cont").OfType<double>();
-            List<double> valContent = (List<double>) structureInventory.GetValuesFromColumn("val_cont").OfType<double>();
-            List<double> valVehic = (List<double>) structureInventory.GetValuesFromColumn("val_vehic").OfType<double>();
-            List<string> damCat = (List<string>) structureInventory.GetValuesFromColumn("st_damcat").OfType<string>();
-            List<string> occtype = (List<string>) structureInventory.GetValuesFromColumn("occtype").OfType<string>();
-            List<int>    pop2amu65 = (List<int>) structureInventory.GetValuesFromColumn("pop2amu65").OfType<int>();
-            List<int>    pop2amo65 = (List<int>) structureInventory.GetValuesFromColumn("pop2amo65").OfType<int>();
-            List<int>    pop2pmu65 = (List<int>) structureInventory.GetValuesFromColumn("pop2pmu65").OfType<int>();
-            List<int>    pop2pmo65 = (List<int>) structureInventory.GetValuesFromColumn("pop2pmo65").OfType<int>();
             _structures = new List<Structure>();
-
-            for(int i = 0; i < names.Count(); i++)
+            for(int i = 0; i < structureInventory.FeatureCount(); i++)
             {
-                _structures.Add(new Structure(names[i], x[i], y[i], foundheight[i], valStructure[i], valContent[i], valVehic[i], damCat[i], occtype[i], pop2amu65[i], pop2amo65[i], pop2pmu65[i], pop2pmo65[i]));
-            }
+                var row = structureInventory.FeatureRow(i);
+                int fid =(int) row["fd_id"];
+                double x = (double) row["x"];
+                double y = (double) row["y"];
+                double found_ht = (double)row["found_ht"];
+                double val_struct = (double)row["val_struct"];
+                double val_cont = (double)row["val_cont"];
+                double val_vehic = (double)row["val_vehic"];
+                string st_damcat = (string)row["st_damcat"];
+                string occtype = (string)row["occtype"];
+                int pop2amu65 = (int)row["pop2amu65"];
+                int pop2amo65 = (int)row["pop2amo65"];
+                int pop2pmu65 = (int)row["pop2pmu65"];
+                int pop2pmo65 = (int)row["pop2pmo65"];
 
-            IEnumerable<Point> sIPoints = structureInventory.Points();
-            foreach(string header in _columnsOfInterest)
-            {
-
-            }
-            foreach (Point point in sIPoints)
-            {
-                //This is gonna rely on the NSI column headers. 
+                _structures.Add(new Structure(fid, x, y, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65));
             }
         }
         public DeterministicInventory Sample(int seed)

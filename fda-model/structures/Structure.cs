@@ -8,7 +8,7 @@ namespace structures
 {
     public class Structure
     {
-        private string _name;
+        private int _fdid;
         private double _x;
         private double _y;
         private double _foundationHeightMean;
@@ -26,10 +26,10 @@ namespace structures
         private int _pop2pmo65;
 
         //This parameter list lines up with columnsOfInterest in the Inventory 
-        public Structure(string name, double x, double y, double foundationHeightMean,double structureValue, double contentValue, 
+        public Structure(int name, double x, double y, double foundationHeightMean,double structureValue, double contentValue, 
             double vehicleValue, string damCat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pm065)
         {
-            _name = name;
+            _fdid = name;
             _x = x;
             _y = y;
             _foundationHeightMean = foundationHeightMean;
@@ -51,7 +51,7 @@ namespace structures
             double foundHeightSample = _foundationHeightMean + (_foundationHeightMean * occtype.FoundationHeightError);
             double structValueSample = _StructureValue.InverseCDF(random.NextDouble());
             //load up the deterministic structure
-            return new DeterministicStructure(_name,structValueSample,foundHeightSample);
+            return new DeterministicStructure(_fdid,structValueSample,foundHeightSample);
         }
 
     }
