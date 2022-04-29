@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RasMapperLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +25,12 @@ namespace structures
         private int _pop2amo65;
         private int _pop2pmu65;
         private int _pop2pmo65;
+
+        public PointM XYPoint 
+        {
+            get {return new PointM(_x,_y); }
+        }
+
 
         //This parameter list lines up with columnsOfInterest in the Inventory 
         public Structure(int name, double x, double y, double foundationHeightMean,double structureValue, double contentValue, 
