@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace structures
 {
+    //TODO: Figure out how to set Occupany Type Set
     public class Inventory
 {
         private List<Structure> _structures;
         private OccupancyTypeSet _Occtypes;
 
-        //These guys are all the headers from the NSI I want to save in our structure objects
-        //These specifically line up with the parameters for the structure constructor
-        private String[] _columnsOfInterest = new String[] {"fd_id","x","y","found_ht","val_struct",
-            "val_cont","val_vehic","st_damcat","occtype","pop2amu65","pop2amo65","pop2pmu65","pop2pm065"};
-        
+        /// <summary>
+        /// Constructor to create a SI from a shapefile. Gonna need to do this from database potentially as well
+        /// </summary>
+        /// <param name="pointShapefilePath"></param>
         public Inventory(string pointShapefilePath)
         {
             PointFeatureLayer structureInventory = new PointFeatureLayer("Structure_Inventory", pointShapefilePath);
@@ -42,6 +42,30 @@ namespace structures
                 _structures.Add(new Structure(fid, x, y, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65));
             }
         }
+        /// <summary>
+        /// returns the subset of this inventory contained within the polygon provided. 
+        /// </summary>
+        /// <param name="impactArea"></param>
+        /// <returns></returns>
+        public Inventory GetInventoryTrimmmedToPolygon(Polygon impactArea)
+        {
+            foreach(Structure structure in _structures)
+            {
+               //TODO: Figure out this logic 
+            }
+            return null;
+        }
+
+        public PointMs GetPointMs()
+        {
+            PointMs points = new PointMs();
+            foreach(Structure structure in _structures)
+            {
+                points.Add(structure.XYPoint);
+            }
+            return points;
+        }
+
         public DeterministicInventory Sample(int seed)
         {
             Random random = new Random(seed);
