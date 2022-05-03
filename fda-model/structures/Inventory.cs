@@ -38,22 +38,28 @@ namespace structures
                 int pop2amo65 = (int)row["pop2amo65"];
                 int pop2pmu65 = (int)row["pop2pmu65"];
                 int pop2pmo65 = (int)row["pop2pmo65"];
-
                 _structures.Add(new Structure(fid, x, y, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65));
             }
         }
-        /// <summary>
-        /// returns the subset of this inventory contained within the polygon provided. 
-        /// </summary>
-        /// <param name="impactArea"></param>
-        /// <returns></returns>
+
+        public Inventory(List<Structure> structures, OccupancyTypeSet occTypes)
+        {
+            _structures = structures;
+            _Occtypes = occTypes;
+        }
+
         public Inventory GetInventoryTrimmmedToPolygon(Polygon impactArea)
         {
+            List<Structure> filteredStructureList = new List<Structure>();
+
             foreach(Structure structure in _structures)
             {
-               //TODO: Figure out this logic 
+                if (impactArea.Contains(structure.XYPoint))
+                {
+                    filteredStructureList.Add(structure);
+                }
             }
-            return null;
+            return new Inventory(filteredStructureList, _Occtypes);
         }
 
         public PointMs GetPointMs()
