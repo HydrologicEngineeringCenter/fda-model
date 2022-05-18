@@ -8,6 +8,12 @@
         private double _ContentValue;
         private double _OtherValue;
         private DeterministicOccupancyType _occtype;
+        public string DamageCatagory { get
+            {
+                return _occtype.DamCatName;
+            }
+        }
+
 
         public DeterministicStructure(int name, double structValueSample, double foundHeightSample)
         {
@@ -16,7 +22,7 @@
             _foundationHeight = foundHeightSample;
         }
 
-        public StructureDamageResult ComputeDamage(double depth)
+        public StructureDamageResult ComputeDamage(float depth)
         {
             double depthabovefoundHeight = depth - _foundationHeight;
             double structDamagepercent = _occtype.StructureDamageFunction.f(depthabovefoundHeight);

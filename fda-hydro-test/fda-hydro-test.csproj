@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\fda-hydro\fda-hydro.csproj" />
+    <ProjectReference Include="..\fda-model\fda-model.csproj" />
   </ItemGroup>
 
 </Project>

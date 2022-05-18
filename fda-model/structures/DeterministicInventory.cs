@@ -4,23 +4,23 @@ namespace structures
 {
     public class DeterministicInventory
 {
-        IList<DeterministicStructure> _inventory;
+        public IList<DeterministicStructure> Inventory;
 
         public DeterministicInventory(IList<DeterministicStructure> inventorySample)
         {
-            _inventory = inventorySample;
+            Inventory = inventorySample;
         }
-        public IList<StructureDamageResult> ComputeDamages(IList<double> depths)
+        public IList<StructureDamageResult> ComputeDamages(float[] depths)
         {
             //assume each structure has a corresponding index to the depth
             List<StructureDamageResult> results = new List<StructureDamageResult>();
             StructureDamageResult nodamage = new StructureDamageResult(0, 0, 0);
-            for(int i = 0; i < _inventory.Count; i++)
+            for(int i = 0; i < Inventory.Count; i++)
             {
-                double depth = depths[i];
-                if (depth != null)
+                float depth = depths[i];
+                if (depth != -9999)
                 {
-                    results.Add(_inventory[i].ComputeDamage(depth));
+                    results.Add(Inventory[i].ComputeDamage(depth));
                 }
                 else
                 {

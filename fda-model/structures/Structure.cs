@@ -10,12 +10,11 @@ namespace structures
     public class Structure
     {
         private int _fdid;
-        private double _x;
-        private double _y;
+        private PointM _point;
         private double _foundationHeightMean;
-        private Statistics.ContinuousDistribution _StructureValue; //ehhh, how do we get these distributions? we don't define them at the structure level. 
-        private Statistics.ContinuousDistribution _ContentValue;
-        private Statistics.ContinuousDistribution _OtherValue;
+        private double _StructureValue; 
+        private double _ContentValue;
+        private double _OtherValue;
         private double _StructureValueFromInput;
         private double _ContentValueFromInput;
         private double _OtherValueFromInput;
@@ -25,20 +24,21 @@ namespace structures
         private int _pop2amo65;
         private int _pop2pmu65;
         private int _pop2pmo65;
+        private int _impactAreaID;
+        private int _cbdID;
 
+        // ADD AN IMPACT AREA ID
         public PointM XYPoint 
         {
-            get {return new PointM(_x,_y); }
+            get {return _point; }
         }
 
 
         //This parameter list lines up with columnsOfInterest in the Inventory 
-        public Structure(int name, double x, double y, double foundationHeightMean,double structureValue, double contentValue, 
-            double vehicleValue, string damCat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pm065)
+        public Structure(int name, PointM point , double foundationHeightMean,double structureValue, double contentValue, double vehicleValue, string damCat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pm065, int impactAreaID, int censusBlockID)
         {
             _fdid = name;
-            _x = x;
-            _y = y;
+            _point = point;
             _foundationHeightMean = foundationHeightMean;
             _StructureValueFromInput = structureValue;
             _ContentValueFromInput = contentValue;
@@ -49,17 +49,27 @@ namespace structures
             _pop2amo65 = pop2amo65;
             _pop2pmu65 = pop2pmu65;
             _pop2pmo65 = pop2pm065;
+            _impactAreaID = impactAreaID;
+            _cbdID = censusBlockID;
         }
+
+        public Structure(int fid, PointM point, double found_ht, double val_struct, double val_cont, double val_vehic, string st_damcat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pmo65, int cbfips)
+        {
+        }
+
         public string DamCatName { get { return _damcat_name; } }
         public string OccTypeName { get { return _occtype_name; } }
         public DeterministicStructure Sample(int seed, DeterministicOccupancyType occtype)
         {
             Random random = new Random(seed);
             double foundHeightSample = _foundationHeightMean + (_foundationHeightMean * occtype.FoundationHeightError);
-            double structValueSample = _StructureValue.InverseCDF(random.NextDouble());
+            double structValueSample = _StructureValue;
             //load up the deterministic structure
             return new DeterministicStructure(_fdid,structValueSample,foundHeightSample);
+
         }
+
+
 
     }
 }

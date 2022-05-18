@@ -1,60 +1,83 @@
 ﻿using structures;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RasMapperLib;
 using fda_hydro.hydraulics;
+using paireddata;
+using System;
 
 namespace fda_model.compute
 {
     public class StageAggregatedDamageCompute
     {
         private Inventory _inventory;
-        private string _polygonShapefilePath;
-        private int _polygonID;
         private HydraulicDataset _hydraulics;
 
-
-        private void Compute()
+        public StageAggregatedDamageCompute(Inventory inventory, HydraulicDataset hydraulics)
         {
-            IList<IList<StructureDamageResult>> totalResults = new List<IList<StructureDamageResult>>();
-
-            Polygon impactArea = GetSpecificImpactArea();
-            Inventory impactAreaInventory = _inventory.GetInventoryTrimmmedToPolygon(impactArea);
-            DeterministicInventory sampledInventory = impactAreaInventory.Sample(0);
-            HydraulicPoint[] hydroPoints = _hydraulics.GetHydraulicDataFromUnsteadyHDFs(impactAreaInventory.GetPointMs());
-            
-            //create a array of points with depths for each WS
-            //for each computed WS
-            for (int i = 0; i < _hydraulics.Probabilities.Length; i++)
-            {
-                double[] depths = new double[hydroPoints.Length];
-                //for each point
-                for (int j = 0; j < hydroPoints.Length; j++)
-                {
-                    depths[j] = hydroPoints[j].depths[i];
-                }
-                IList<StructureDamageResult> results = sampledInventory.ComputeDamages(depths);
-                totalResults.Add(results);
-            }
+            _inventory = inventory;
+            _hydraulics = hydraulics;
         }
-        private Polygon GetSpecificImpactArea()
+
+        private void Compute(int seed, int iterations)
         {
-            PolygonFeatureLayer polygonFeatureLayer = new PolygonFeatureLayer(_polygonShapefilePath);
-            var polygons = polygonFeatureLayer.Polygons();
-            var polygonsList = polygons.ToList();
-            for (int i = 0; i < polygonsList.Count; i++)
+            Random randomNumberGenerator = new Random(seed);
+
+            //get the XYs off the inventory 
+            PointMs structurePoints = _inventory.GetPointMs();
+            //Create StageDamageOrdinate 
+            //Create IList of DamageResult
+
+            //iterate across hydraulics datasets -- we want at each dataset - for a given impact area, for a given damage catagory,
+            //for a given asset catagory, we need a distribution of damages
+            foreach(HydraulicProfile set in _hydraulics.HydraulicProfiles)
             {
-                var row = polygonFeatureLayer.FeatureRow(i);
-                if ((int)row[i] == _polygonID)
+                //get depths for all structure in the inventory 
+                float[] depths = set.GetHydraulicDataFromUnsteadyHDFs(structurePoints);
+
+                //add uncertainty 
+                for (int i = 0; i < iterations; i++)
                 {
-                    Polygon impactArea = polygonsList[i];
-                    return impactArea;
+                    DeterministicInventory sampledInventory = _inventory.Sample(randomNumberGenerator.Next());
+
+                    //compute an iteration of damage for all structures for this hydraulic set
+                    for (int j = 0; j < depths.Count(); j++)
+                    {
+                        if (depths[j] != -9999)
+                        {
+                            StructureDamageResult results = sampledInventory.Inventory[j].ComputeDamage(depths[j]);
+                            //add result to proper damage result
+                        }
+
+                        //this is the loop where we want to load up the histogram with damages by catagory, impact area
+                    }
                 }
             }
+
+            
+            
+
+        }
+
+
+
+        //private PairedData AssociateIndexPointWithProbabilities(PointM indexPoint)
+        //{
+        //    PointMs indexPointMs = new PointMs();
+        //    indexPointMs.Add(indexPoint);
+        //   List<double[]> points = _hydraulics.GetHydraulicDataFromUnsteadyHDFs(indexPointMs);
+        //    double[] depths = new double[points.Count];
+        //    for(int i = 0; i < points.Count; i++)
+        //    {
+        //        depths[i] = points[i][0];
+        //    }
+        //    return new PairedData(_hydraulics.Probabilities.ToArray(),depths);
+        //}
+
+        private PairedData GetStageAggDamCurves(IList<IList<StructureDamageResult>> structureDamageResults, PairedData indexPoint)
+        {
             return null;
+            //TODO: figure out how to aggregate to this bad boy
         }
     }
 }

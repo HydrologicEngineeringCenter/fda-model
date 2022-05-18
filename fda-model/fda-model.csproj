@@ -25,7 +25,6 @@
 
 	
   <ItemGroup>
-    <ProjectReference Include="..\fda-hydro\fda-hydro.csproj" />
     <ProjectReference Include="..\Statistics\Statistics.csproj" />
   </ItemGroup>
 

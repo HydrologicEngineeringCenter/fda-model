@@ -16,7 +16,7 @@ namespace fda_hydro.hydraulics
 
     public class HydraulicDataset
     {
-        public IList<HydraulicProfile> HydraulicProfiles { get; set; };
+        public IList<HydraulicProfile> HydraulicProfiles { get; set; }
         public HydraulicDataset(IList<HydraulicProfile> profiles)
         {
         }

@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace structures
@@ -18,16 +16,17 @@ namespace structures
         /// Constructor to create a SI from a shapefile. Gonna need to do this from database potentially as well
         /// </summary>
         /// <param name="pointShapefilePath"></param>
-        public Inventory(string pointShapefilePath)
+        public Inventory(string pointShapefilePath, string impactAreaShapefilePath)
         {
             PointFeatureLayer structureInventory = new PointFeatureLayer("Structure_Inventory", pointShapefilePath);
+            PointMs pointMs = new PointMs(structureInventory.Points().Select(p => p.PointM()));
             _structures = new List<Structure>();
             for(int i = 0; i < structureInventory.FeatureCount(); i++)
             {
+
+                PointM point = pointMs[i];
                 var row = structureInventory.FeatureRow(i);
                 int fid =(int) row["fd_id"];
-                double x = (double) row["x"];
-                double y = (double) row["y"];
                 double found_ht = (double)row["found_ht"];
                 double val_struct = (double)row["val_struct"];
                 double val_cont = (double)row["val_cont"];
@@ -38,9 +37,15 @@ namespace structures
                 int pop2amo65 = (int)row["pop2amo65"];
                 int pop2pmu65 = (int)row["pop2pmu65"];
                 int pop2pmo65 = (int)row["pop2pmo65"];
-                _structures.Add(new Structure(fid, x, y, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65));
+                int cbfips = (int)row["cbfips"];
+                int impactAreaID = GetImpactAreaID(point,  impactAreaShapefilePath);
+                _structures.Add(new Structure(fid, point, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65, cbfips));
             }
         }
+        // Will need a constructor/load from Database ; 
+
+        // add method to attach impact area index to a structure 
+
 
         public Inventory(List<Structure> structures, OccupancyTypeSet occTypes)
         {
@@ -70,6 +75,22 @@ namespace structures
                 points.Add(structure.XYPoint);
             }
             return points;
+        }
+
+        private int GetImpactAreaID(PointM point, string polygonShapefilePath)
+        {
+            PolygonFeatureLayer polygonFeatureLayer = new PolygonFeatureLayer("impactAreas", polygonShapefilePath);
+            List<Polygon> polygons = polygonFeatureLayer.Polygons().ToList();
+            var polygonsList = polygons.ToList();
+            for(int i = 0; i < polygonsList.Count; i++)
+            {
+                if (polygons[i].Contains(point))
+                {
+                    var row = polygonFeatureLayer.FeatureRow(i);
+                    return (int)row["fd_id"];
+                }
+            }
+            return -9999;
         }
 
         public DeterministicInventory Sample(int seed)
