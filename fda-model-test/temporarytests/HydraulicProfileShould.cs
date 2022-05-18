@@ -6,10 +6,11 @@ using System.IO;
 using Geospatial.GDALAssist;
 using structures;
 
-namespace fda_hydro_test
+namespace fda_model_test_unittests
 {
     /// <summary>
-    ///Test data needs to all be in the same projection.
+    ///Test data needs to all be in the same projection. This test requirest the quick start guide dataset be saved in the locations in the strings. This test should not be run remotely, and can eventually be deleted. It exists to help test and validate the design
+    /// of the aggregated stage damage compute.
     /// </summary>
     public class HydraulicProfileShould
     {
@@ -30,7 +31,7 @@ namespace fda_hydro_test
                 "C:\\TestData\\Native Output Files\\Muncie.p01.hdf" 
         };
 
-        static double[] probabilities = new double[] { .002, .005, .01, .05, .1, .2, .5 };
+        static double[] probabilities = new double[] { .002, .005, .01, .05, .1, .2, .5, .9 };
 
 
         static HydraulicProfileShould()
