@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xunit;
 using metrics;
 using compute;
@@ -10,7 +8,7 @@ using paireddata;
 using Statistics;
 using Statistics.Distributions;
 
-namespace fda_model_test
+namespace fda_model_test.unittests
 {
     [Trait("Category", "Unit")]
     public class PerformanceTest
@@ -22,6 +20,10 @@ namespace fda_model_test
         static string xLabel = "x label";
         static string yLabel = "y label";
         static string name = "name";
+        static string damCat = "residential";
+        static string assetCat = "structure";
+        static CurveMetaData metaData = new CurveMetaData(xLabel, yLabel, name, damCat, assetCat);
+        static int id = 0;
 
         /// <summary>
         /// The calculations for the results in the test below can be found at https://docs.google.com/spreadsheets/d/1UUNgHYq1_zV4ifnu0iVmiPOzL2szyBCX/edit?usp=sharing&ouid=105470256128470573157&rtpof=true&sd=true
@@ -46,7 +48,7 @@ namespace fda_model_test
             {
                 stages[i] = IDistributionFactory.FactoryUniform(0, 20000 * i, 10);
             }
-            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, xLabel, yLabel, name);
+            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, metaData);
             //create a damage distribution
             IDistribution[] damages = new IDistribution[2];
             for (int i = 0; i < 2; i++)
@@ -54,14 +56,14 @@ namespace fda_model_test
                 damages[i] = IDistributionFactory.FactoryUniform(0, 600000 * i, 10);
             }
 
-            UncertainPairedData stage_damage = new UncertainPairedData(Stages, damages, xLabel, yLabel, name,  "residential");
+            UncertainPairedData stage_damage = new UncertainPairedData(Stages, damages, metaData);
             List<UncertainPairedData> uncertainPairedDataList = new List<UncertainPairedData>();
             uncertainPairedDataList.Add(stage_damage);
             int thresholdID = 1;
             ConvergenceCriteria cc = new ConvergenceCriteria(minIterations: 1, maxIterations: iterations);
             Threshold threshold = new Threshold(thresholdID, cc, ThresholdEnum.ExteriorStage, thresholdValue);
 
-            Simulation simulation = Simulation.builder()
+            ImpactAreaScenarioSimulation simulation = ImpactAreaScenarioSimulation.builder(id)
                 .withFlowFrequency(flow_frequency)
                 .withFlowStage(flow_stage)
                 .withStageDamages(uncertainPairedDataList)
@@ -69,10 +71,11 @@ namespace fda_model_test
                 .build();
  
             MeanRandomProvider meanRandomProvider = new MeanRandomProvider();
-            metrics.Results results = simulation.Compute(meanRandomProvider, cc,false);
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(meanRandomProvider, cc,false);
 
-            double actualAEP = results.PerformanceByThresholds.ThresholdsDictionary[thresholdID].ProjectPerformanceResults.MeanAEP();
-            double actualLTEP = results.PerformanceByThresholds.ThresholdsDictionary[thresholdID].ProjectPerformanceResults.LongTermExceedanceProbability(years);
+            // PLEASE LEAVE THE COMMENTS TO THE RIGHT OF THESE LINES AS AN EXAMPLE FOR LATER REFERENCE 
+            double actualAEP = results.MeanAEP(thresholdID); // results.PerformanceByThresholds.GetThreshold(thresholdID).SystemPerformanceResults.MeanAEP();
+            double actualLTEP = results.LongTermExceedanceProbability(thresholdID, years); //results.PerformanceByThresholds.GetThreshold(thresholdID).SystemPerformanceResults.LongTermExceedanceProbability(years);
 
             double aepDifference = Math.Abs(expectedAEP - actualAEP);
             double aepRelativeDifference = aepDifference / expectedAEP;
@@ -100,39 +103,29 @@ namespace fda_model_test
             {
                 stages[i] = IDistributionFactory.FactoryUniform(0, 20000 * i, 10);
             }
-            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, xLabel, yLabel, name);
+            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, metaData);
             //create a damage distribution
-            IDistribution[] damages = new IDistribution[2];
-            for (int i = 0; i < 2; i++)
-            {
-                damages[i] = IDistributionFactory.FactoryUniform(0, 600000 * i, 10);
-            }
-
-            UncertainPairedData stage_damage = new UncertainPairedData(Stages, damages, xLabel, yLabel, name, "residential");
-            List<UncertainPairedData> uncertainPairedDataList = new List<UncertainPairedData>();
-            uncertainPairedDataList.Add(stage_damage);
             IDistribution[] failureProbs = new IDistribution[StageForNonLeveeFailureProbs.Length];
             for (int i = 0; i < StageForNonLeveeFailureProbs.Length; i++)
             {
                 failureProbs[i] = new Deterministic(ProbLeveeFailure[i]);
             }
-            UncertainPairedData leveeCurve = new UncertainPairedData(StageForNonLeveeFailureProbs, failureProbs, xLabel, yLabel, name);
+            UncertainPairedData leveeCurve = new UncertainPairedData(StageForNonLeveeFailureProbs, failureProbs, metaData);
 
             int thresholdID = 1;
             ConvergenceCriteria cc = new ConvergenceCriteria(minIterations: 1, maxIterations: iterations);
             Threshold threshold = new Threshold(thresholdID, cc, ThresholdEnum.ExteriorStage, thresholdValue);
 
-            Simulation simulation = Simulation.builder()
+            ImpactAreaScenarioSimulation simulation = ImpactAreaScenarioSimulation.builder(id)
                 .withFlowFrequency(flow_frequency)
                 .withFlowStage(flow_stage)
-                .withStageDamages(uncertainPairedDataList)
                 .withAdditionalThreshold(threshold)
                 .withLevee(leveeCurve,thresholdValue)
                 .build();
 
             MeanRandomProvider meanRandomProvider = new MeanRandomProvider();
-            metrics.Results results = simulation.Compute(meanRandomProvider, cc, false);
-            double actual = results.PerformanceByThresholds.ThresholdsDictionary[thresholdID].ProjectPerformanceResults.MeanAEP();
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(meanRandomProvider, cc, false);
+            double actual = results.MeanAEP(thresholdID);
             Assert.Equal(expected,actual,2);
         }
         /// <summary>
@@ -158,7 +151,7 @@ namespace fda_model_test
             {
                 stages[i] = IDistributionFactory.FactoryUniform(0, 20000 * i, 10);
             }
-            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, xLabel, yLabel, name);
+            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, metaData);
             //create a damage distribution
             IDistribution[] damages = new IDistribution[2];
             for (int i = 0; i < 2; i++)
@@ -166,15 +159,15 @@ namespace fda_model_test
                 damages[i] = IDistributionFactory.FactoryUniform(0, 600000 * i, 10);
             }
 
-            UncertainPairedData stage_damage = new UncertainPairedData(Stages, damages, xLabel, yLabel, name, "residential");
+            UncertainPairedData stage_damage = new UncertainPairedData(Stages, damages, metaData);
             List<UncertainPairedData> uncertainPairedDataList = new List<UncertainPairedData>();
             uncertainPairedDataList.Add(stage_damage);
             int thresholdID = 1;
 
-            ConvergenceCriteria cc = new ConvergenceCriteria(minIterations: 100, maxIterations: iterations, tolerance: .001);
-            Threshold threshold = new Threshold(thresholdID, cc, ThresholdEnum.ExteriorStage, thresholdValue);
+            ConvergenceCriteria convergenceCriteria = new ConvergenceCriteria(minIterations: 100, maxIterations: iterations, tolerance: .001);
+            Threshold threshold = new Threshold(thresholdID, convergenceCriteria, ThresholdEnum.ExteriorStage, thresholdValue);
 
-            Simulation simulation = Simulation.builder()
+            ImpactAreaScenarioSimulation simulation = ImpactAreaScenarioSimulation.builder(id)
                 .withFlowFrequency(flow_frequency)
                 .withFlowStage(flow_stage)
                 .withStageDamages(uncertainPairedDataList)
@@ -182,8 +175,8 @@ namespace fda_model_test
                 .build();
 
             RandomProvider randomProvider = new RandomProvider(seed);
-            metrics.Results results = simulation.Compute(randomProvider, cc, false);
-            double actual = results.PerformanceByThresholds.ThresholdsDictionary[thresholdID].ProjectPerformanceResults.ConditionalNonExceedanceProbability(recurrenceInterval);
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(randomProvider, convergenceCriteria, false);
+            double actual = results.AssuranceOfEvent(thresholdID, recurrenceInterval);
             double difference = Math.Abs(actual - expected);
             double relativeDifference = difference / expected;
             double tolerance = 0.025;
@@ -205,8 +198,8 @@ namespace fda_model_test
             performanceByThresholds.AddThreshold(threshold2);
 
             double keyForCNEP = .98;
-            performanceByThresholds.ThresholdsDictionary[thresholdID1].ProjectPerformanceResults.AddConditionalNonExceedenceProbabilityKey(keyForCNEP, convergenceCriteria);
-            performanceByThresholds.ThresholdsDictionary[thresholdID2].ProjectPerformanceResults.AddConditionalNonExceedenceProbabilityKey(keyForCNEP, convergenceCriteria);
+            performanceByThresholds.GetThreshold(thresholdID1).SystemPerformanceResults.AddAssuranceHistogram(keyForCNEP);
+            performanceByThresholds.GetThreshold(thresholdID2).SystemPerformanceResults.AddAssuranceHistogram(keyForCNEP);
 
             int iterations = 2250;
             int seed = 1234;
@@ -219,24 +212,64 @@ namespace fda_model_test
                 double uniformObservation2 = random.NextDouble()+2;
                 double messyObservation = normal.InverseCDF(random.NextDouble())* random.NextDouble(); //+ random.NextDouble() * random.NextDouble() * random.NextDouble() * 1000;
                 double messyObservationLogged = Math.Log(Math.Abs(messyObservation));
-                performanceByThresholds.ThresholdsDictionary[thresholdID1].ProjectPerformanceResults.AddStageForCNEP(keyForCNEP, uniformObservation1, i);
-                performanceByThresholds.ThresholdsDictionary[thresholdID1].ProjectPerformanceResults.AddStageForCNEP(keyForCNEP, uniformObservation2, i);
-                performanceByThresholds.ThresholdsDictionary[thresholdID2].ProjectPerformanceResults.AddStageForCNEP(keyForCNEP, messyObservationLogged, i);
-                performanceByThresholds.ThresholdsDictionary[thresholdID2].ProjectPerformanceResults.AddStageForCNEP(keyForCNEP, messyObservation, i);
+                performanceByThresholds.GetThreshold(thresholdID1).SystemPerformanceResults.AddStageForAssurance(keyForCNEP, uniformObservation1, i);
+                performanceByThresholds.GetThreshold(thresholdID1).SystemPerformanceResults.AddStageForAssurance(keyForCNEP, uniformObservation2, i);
+                performanceByThresholds.GetThreshold(thresholdID2).SystemPerformanceResults.AddStageForAssurance(keyForCNEP, messyObservationLogged, i);
+                performanceByThresholds.GetThreshold(thresholdID2).SystemPerformanceResults.AddStageForAssurance(keyForCNEP, messyObservation, i);
             }
-
-            double upperConfidenceLimitProbability = 0.975;
-            double lowerConfidenceLimitProbability = 0.025;
-            Results results = new Results();
+            ImpactAreaScenarioResults results = new ImpactAreaScenarioResults(id);
             results.PerformanceByThresholds = performanceByThresholds;
 
-            bool isFirstThresholdConverged = performanceByThresholds.ThresholdsDictionary[thresholdID1].ProjectPerformanceResults.CNEPHistogramOfStages[keyForCNEP].TestForConvergence(upperConfidenceLimitProbability, lowerConfidenceLimitProbability);
-            bool isSecondThresholdConverged = performanceByThresholds.ThresholdsDictionary[thresholdID2].ProjectPerformanceResults.CNEPHistogramOfStages[keyForCNEP].TestForConvergence(upperConfidenceLimitProbability, lowerConfidenceLimitProbability);
+            bool isFirstThresholdConverged = performanceByThresholds.GetThreshold(thresholdID1).SystemPerformanceResults.AssuranceTestForConvergence(.05,.95);
+            bool isSecondThresholdConverged = performanceByThresholds.GetThreshold(thresholdID2).SystemPerformanceResults.AssuranceTestForConvergence(.05, .95);
             bool isPerformanceConverged = results.IsPerformanceConverged();
 
             Assert.True(isFirstThresholdConverged);
             Assert.False(isSecondThresholdConverged);
             Assert.False(isPerformanceConverged);
+        }
+
+        [Theory]
+        [InlineData(9102, 10001, 16000)]
+        public void SerializationShouldReadTheSameObjectItWrites(int seed, int iterations, double thresholdValue)
+        {
+            ContinuousDistribution flow_frequency = new Uniform(0, 100000, 1000);
+            //create a stage distribution
+            IDistribution[] stages = new IDistribution[2];
+            for (int i = 0; i < 2; i++)
+            {
+                stages[i] = IDistributionFactory.FactoryUniform(0, 20000 * i, 10);
+            }
+            UncertainPairedData flow_stage = new UncertainPairedData(Flows, stages, metaData);
+            //create a damage distribution
+            IDistribution[] damages = new IDistribution[2];
+            for (int i = 0; i < 2; i++)
+            {
+                damages[i] = IDistributionFactory.FactoryUniform(0, 600000 * i, 10);
+            }
+
+            UncertainPairedData stage_damage = new UncertainPairedData(Stages, damages, metaData);
+            List<UncertainPairedData> uncertainPairedDataList = new List<UncertainPairedData>();
+            uncertainPairedDataList.Add(stage_damage);
+            int thresholdID = 1;
+
+            ConvergenceCriteria cc = new ConvergenceCriteria(minIterations: 100, maxIterations: iterations, tolerance: .001);
+            Threshold threshold = new Threshold(thresholdID, cc, ThresholdEnum.ExteriorStage, thresholdValue);
+
+            ImpactAreaScenarioSimulation simulation = ImpactAreaScenarioSimulation.builder(id)
+                .withFlowFrequency(flow_frequency)
+                .withFlowStage(flow_stage)
+                .withStageDamages(uncertainPairedDataList)
+                .withAdditionalThreshold(threshold)
+                .build();
+
+            RandomProvider randomProvider = new RandomProvider(seed);
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(randomProvider, cc, false);
+            XElement xElement = results.PerformanceByThresholds.GetThreshold(thresholdID).SystemPerformanceResults.WriteToXML();
+            //TODO: At the next line, convergence criteria is being re-set to 100000
+            SystemPerformanceResults projectPerformanceResults = SystemPerformanceResults.ReadFromXML(xElement);
+            bool success = results.PerformanceByThresholds.GetThreshold(thresholdID).SystemPerformanceResults.Equals(projectPerformanceResults);
+            Assert.True(success);
         }
 
     }

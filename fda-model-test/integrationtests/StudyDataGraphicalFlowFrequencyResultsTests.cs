@@ -15,7 +15,7 @@ namespace fda_model_test.integrationtests
 {
     /// <summary>
     /// The example data in this test is based on Bear Creek Workshop 4 FDA study data
-    /// The data is based on PYSR Without, 2024, S Fork Bear, SF-8
+    /// The data is based on PYSR Without, 2024, S Fork Bear, SF-8, Residential
     /// see: https://drive.google.com/file/d/12WJL6ambACQLfqGUwbg7tv_wMxLn-a6t/view?usp=sharing
     /// </summary>
     public class StudyDataGraphicalFlowFrequencyResultsTests
@@ -35,7 +35,7 @@ namespace fda_model_test.integrationtests
             new Normal(474.53, .5),
             new Normal(475.11, .5),
             new Normal(477.4, .5)
-        };
+        }; ///observe the large non-overlapping portion of stage-damage vs stage-discharge
         static double[] stageDamageStages = new double[] { 463, 464, 465, 466, 467, 468, 469, 470, 471, 472, 473, 474, 475, 476, 477, 478, 479, 480, 481, 482 };
         static IDistribution[] stageDamageDamageDistributions = new IDistribution[]
         {
@@ -63,29 +63,33 @@ namespace fda_model_test.integrationtests
         static string xLabel = "x label";
         static string yLabel = "y label";
         static string name = "name";
-        static string category = "residential";
-        static CurveMetaData curveMetaData = new CurveMetaData(xLabel, yLabel, name, category);
+        static string damCat = "residential";
+        static string assetCat = "content";
+        static int impactAreaID = 0;
+        static CurveTypesEnum curveType = CurveTypesEnum.StrictlyMonotonicallyIncreasing;
+        static CurveMetaData curveMetaData = new CurveMetaData(xLabel, yLabel, name, damCat, curveType,assetCat);
         
         [Theory]
-        [InlineData(1234, 105.55)]
+        [InlineData(1234, 0.96)]
         public void ComputeMeanEADWithIterations_Test(int seed, double expected)
         {
-            GraphicalUncertainPairedData dischargeFrequency = new GraphicalUncertainPairedData(exceedanceProbabilities, dischargeFrequencyDischarges, equivalentRecordLength, xLabel, yLabel, name, usingStagesNotFlows: false);
-            UncertainPairedData stageDischarge = new UncertainPairedData(stageDischargeFunctionDischarges, stageDischargeFunctionStageDistributions, xLabel, yLabel, name);
+            GraphicalUncertainPairedData dischargeFrequency = new GraphicalUncertainPairedData(exceedanceProbabilities, dischargeFrequencyDischarges, equivalentRecordLength, curveMetaData, usingStagesNotFlows: false);
+            UncertainPairedData stageDischarge = new UncertainPairedData(stageDischargeFunctionDischarges, stageDischargeFunctionStageDistributions, curveMetaData);
             UncertainPairedData stageDamage = new UncertainPairedData(stageDamageStages, stageDamageDamageDistributions, curveMetaData);
             List<UncertainPairedData> stageDamageList = new List<UncertainPairedData>();
             stageDamageList.Add(stageDamage);
-            Simulation simulation = Simulation.builder()
+            ImpactAreaScenarioSimulation simulation = ImpactAreaScenarioSimulation.builder(impactAreaID)
                 .withFlowFrequency(dischargeFrequency)
                 .withFlowStage(stageDischarge)
                 .withStageDamages(stageDamageList)
                 .build();
             RandomProvider randomProvider = new RandomProvider(seed);
             ConvergenceCriteria convergenceCriteria = new ConvergenceCriteria();
-            metrics.Results results = simulation.Compute(randomProvider,convergenceCriteria);
-            double difference = Math.Abs(expected - results.ExpectedAnnualDamageResults.MeanEAD("residential"));
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(randomProvider,convergenceCriteria);
+            double difference = Math.Abs(expected - results.ConsequenceResults.MeanDamage(damCat,assetCat,impactAreaID));
             double relativeDifference = difference / expected;
-            Assert.True(relativeDifference < .2);
+            double tolerance = 0.05;
+            Assert.True(relativeDifference < tolerance);
         }
         
 

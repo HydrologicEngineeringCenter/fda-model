@@ -1,15 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Xml.Linq;
+using HEC.MVVMFramework.Base.Events;
+using HEC.MVVMFramework.Base.Implementations;
+using HEC.MVVMFramework.Base.Interfaces;
 
 namespace metrics
 {
-    public class PerformanceByThresholds
-{        
-        private Dictionary<int,Threshold> _thresholds; 
-        public Dictionary<int,Threshold> ThresholdsDictionary
+    public class PerformanceByThresholds : HEC.MVVMFramework.Base.Implementations.Validation, IReportMessage
+    {
+        #region Fields
+        private List<Threshold> _thresholds;
+        #endregion
+
+        #region Properties 
+        public List<Threshold> ListOfThresholds
         {
             get
             {
@@ -20,23 +24,86 @@ namespace metrics
                 _thresholds = value;
             }
         }
+        public event MessageReportedEventHandler MessageReport;
+
+        #endregion
+
+        #region Constructors 
 
         public PerformanceByThresholds()
         {
-            _thresholds = new Dictionary<int,Threshold>();
+            _thresholds = new List<Threshold>();
                    
         }      
-
+        private PerformanceByThresholds(List<Threshold> thresholds)
+        {
+            _thresholds = thresholds;
+        }
+        #endregion
+        #region Methods 
         public void AddThreshold(Threshold threshold)
         {
-            _thresholds.Add(threshold.ThresholdID,threshold);
+            _thresholds.Add(threshold);
+        }
+        public bool Equals(PerformanceByThresholds incomingPerformanceByThresholds)
+        {
+            bool success = true;
+            foreach (Threshold threshold in ListOfThresholds)
+            {
+                foreach (Threshold inputThreshold in incomingPerformanceByThresholds.ListOfThresholds)
+                {
+                    if (threshold.ThresholdID == inputThreshold.ThresholdID)
+                    {
+                        success = threshold.Equals(inputThreshold);
+                        if (!success)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            return success;
+        }
+        public Threshold GetThreshold(int thresholdID)
+        {
+            foreach (Threshold threshold in _thresholds)
+            {
+                if (threshold.ThresholdID.Equals(thresholdID))
+                {
+                    return threshold;
+                }
+            }
+            Threshold dummyThreshold = new Threshold();
+            ReportMessage(this, new MessageEventArgs(new Message("the requested threshold could not be found so a dummy threshold is being returned")));
+            return dummyThreshold;
+
+        }
+        public XElement WriteToXML()
+        {
+            XElement masterElement = new XElement("Performance_By_Thresholds");
+            foreach (Threshold threshold in ListOfThresholds)
+            {
+                XElement thresholdElement = threshold.WriteToXML();
+                thresholdElement.Name = $"ID{threshold.ThresholdID}";
+                masterElement.Add(thresholdElement);
+            }
+            return masterElement;
         }
 
-        public void RemoveThreshold(Threshold threshold)
+        public static PerformanceByThresholds ReadFromXML(XElement xElement)
         {
-            _thresholds.Remove(threshold.ThresholdID);
-        } 
-
-
-}
+            List<Threshold> thresholdList = new List<Threshold>();
+            foreach (XElement thresholdElement in xElement.Elements())
+            {
+                Threshold threshold = Threshold.ReadFromXML(thresholdElement);
+                thresholdList.Add(threshold);
+            }
+            return new PerformanceByThresholds(thresholdList);
+        }
+        public void ReportMessage(object sender, MessageEventArgs e)
+        {
+            MessageReport?.Invoke(sender, e);
+        }
+        #endregion
+    }
 }

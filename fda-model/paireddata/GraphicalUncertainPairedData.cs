@@ -6,49 +6,68 @@ using interfaces;
 using System.Linq;
 using System.Xml.Linq;
 using System;
-using HEC.MVVMFramework.Base.Enumerations;
+using HEC.MVVMFramework.Base.Events;
 using HEC.MVVMFramework.Base.Implementations;
-
+using HEC.MVVMFramework.Base.Interfaces;
+using HEC.MVVMFramework.Base.Enumerations;
 namespace paireddata
 {
-    public class GraphicalUncertainPairedData : HEC.MVVMFramework.Base.Implementations.Validation, IPairedDataProducer, ICanBeNull
+    public class GraphicalUncertainPairedData : HEC.MVVMFramework.Base.Implementations.Validation, IPairedDataProducer, ICanBeNull, IReportMessage, IMetaData
     {
         #region Fields
         private int _EquivalentRecordLength;
         private double[] _ExceedanceProbabilities;
-        private Statistics.ContinuousDistribution[] _NonMontonicDistributions;
-        private Statistics.ContinuousDistribution[] _DistributionsMonotonicFromAbove;
-        private Statistics.ContinuousDistribution[] _DistributionsMonotonicFromBelow;
+        private double[] _NonExceedanceProbabilities;
+        private Statistics.ContinuousDistribution[] _StageOrLogFlowDistributions;
         private CurveMetaData _metaData;
+        private bool _UsingStagesNotFlows;
+        private double _MaximumProbability;
+        private double _MinimumProbability;
+
         #endregion
 
         #region Properties
+
         public string XLabel
         {
             get { return _metaData.XLabel; }
         }
+
         public string YLabel
         {
             get { return _metaData.YLabel; }
         }
-        public Statistics.ContinuousDistribution[] NonMonotonicDistributions
+        public Statistics.ContinuousDistribution[] StageOrLogFlowDistributions
         {
             get
             {
-                return _NonMontonicDistributions;
+                return _StageOrLogFlowDistributions;
             }
         }
+
         public string Name
         {
             get { return _metaData.Name; }
         }
-        public string Category
+
+        public string DamageCategory
         {
-            get { return _metaData.Category; }
+            get { return _metaData.DamageCategory; }
+        }
+        public string AssetCategory
+        {
+            get { return _metaData.AssetCategory; }
         }
         public bool IsNull
         {
             get { return _metaData.IsNull; }
+        }
+        public CurveMetaData CurveMetaData
+        {
+            get
+            {
+                return _metaData;
+            }
         }
         public double[] ExceedanceProbabilities
         {
@@ -65,6 +84,8 @@ namespace paireddata
             }
 
         }
+        public event MessageReportedEventHandler MessageReport;
+
         #endregion
 
         #region Constructors
@@ -73,38 +94,65 @@ namespace paireddata
             _metaData = new CurveMetaData();
             AddRules();
         }
-
+        [Obsolete("This constructor is deprecated. Construct a CurveMetaData, then inject into constructor")]
         public GraphicalUncertainPairedData(double[] exceedanceProbabilities, double[] flowOrStageValues, int equivalentRecordLength, string xlabel, string ylabel, string name, bool usingStagesNotFlows = true, double maximumProbability = 0.9999, double minimumProbability = 0.0001)
         {
+            _UsingStagesNotFlows = usingStagesNotFlows;
+            _MaximumProbability = maximumProbability;
+            _MinimumProbability = minimumProbability;
             Graphical graphical = new Graphical(exceedanceProbabilities, flowOrStageValues, equivalentRecordLength, usingStagesNotFlows, maximumProbability, minimumProbability);
             graphical.Validate();
             graphical.ComputeGraphicalConfidenceLimits();
             _ExceedanceProbabilities = graphical.ExceedanceProbabilities;
-            _NonMontonicDistributions = graphical.StageOrLogFlowDistributions;
-            _DistributionsMonotonicFromAbove = MakeMeMonotonicFromAbove(_NonMontonicDistributions, usingStagesNotFlows);
-            _DistributionsMonotonicFromBelow = MakeMeMonotonicFromBelow(_NonMontonicDistributions, usingStagesNotFlows);
+            _NonExceedanceProbabilities = ExceedanceToNonExceedance(graphical.ExceedanceProbabilities);
+            _StageOrLogFlowDistributions = graphical.StageOrLogFlowDistributions;
             _EquivalentRecordLength = equivalentRecordLength;
-            _metaData = new CurveMetaData(xlabel, ylabel, name);
+            _metaData = new CurveMetaData(xlabel, ylabel, name, CurveTypesEnum.StrictlyMonotonicallyIncreasing);
             AddRules();
 
         }
+        public GraphicalUncertainPairedData(double[] exceedanceProbabilities, double[] flowOrStageValues, int equivalentRecordLength, CurveMetaData curveMetaData, bool usingStagesNotFlows = true, double maximumProbability = 0.9999, double minimumProbability = 0.0001)
+        {
+            _UsingStagesNotFlows = usingStagesNotFlows;
+            _MaximumProbability = maximumProbability;
+            _MinimumProbability = minimumProbability;
+            Graphical graphical = new Graphical(exceedanceProbabilities, flowOrStageValues, equivalentRecordLength, usingStagesNotFlows, maximumProbability, minimumProbability);
+            graphical.Validate();
+            graphical.ComputeGraphicalConfidenceLimits();
+            _ExceedanceProbabilities = graphical.ExceedanceProbabilities;
+            _NonExceedanceProbabilities = ExceedanceToNonExceedance(graphical.ExceedanceProbabilities);
+            _StageOrLogFlowDistributions = graphical.StageOrLogFlowDistributions;
+            _EquivalentRecordLength = equivalentRecordLength;
+            _metaData = curveMetaData;
+            AddRules();
+
+        }
+        private GraphicalUncertainPairedData(double[] exceedanceProbabilities, Normal[] flowOrStageDistributions, int equivalentRecordLength, CurveMetaData curveMetaData, bool usingStagesNotFlows = true, double maximumProbability = 0.9999, double minimumProbability = 0.0001)
+        {
+            _UsingStagesNotFlows = usingStagesNotFlows;
+            _MaximumProbability = maximumProbability;
+            _MinimumProbability = minimumProbability;
+            _ExceedanceProbabilities = exceedanceProbabilities;
+            _NonExceedanceProbabilities = ExceedanceToNonExceedance(exceedanceProbabilities);
+            _StageOrLogFlowDistributions = flowOrStageDistributions;
+            _EquivalentRecordLength = equivalentRecordLength;
+            _metaData = curveMetaData;
+            AddRules();
+        }
         #endregion
 
-        #region Functions
+        #region Methods
         /// <summary>
-        /// We have rules on monotonicity for exceedance probabilities. We expect the flow or stage distributions 
-        /// to have situations where monotonicity is not satisfied. 
-        /// Using monotonic decreasing because we use exceedance probabilities
+        /// We have rules on monotonicity for non-exceedance probabilities. So we test for strict monotonic decreasing. 
+        /// This means that the exceecance probabilities are strictly monotonically increasing
+        /// Satisfying the curve type enum.
         /// </summary>
         private void AddRules()
         {
             switch (_metaData.CurveType)
             {
-                case CurveTypesEnum.StrictlyMonotonicallyDecreasing:
-                    AddSinglePropertyRule(nameof(ExceedanceProbabilities), new Rule(() => IsArrayValid(ExceedanceProbabilities, (a, b) => (a >= b)), "X must be strictly monotonically decreasing"));
-                    break;
-                case CurveTypesEnum.MonotonicallyDecreasing:
-                    AddSinglePropertyRule(nameof(ExceedanceProbabilities), new Rule(() => IsArrayValid(ExceedanceProbabilities, (a, b) => (a > b)), "X must be monotonically decreasing"));
+                case CurveTypesEnum.StrictlyMonotonicallyIncreasing:
+                    AddSinglePropertyRule(nameof(_NonExceedanceProbabilities), new Rule(() => IsArrayValid(_NonExceedanceProbabilities, (a, b) => (a > b)), "X must be strictly monotonically decreasing"));
                     break;
                 default:
                     break;
@@ -123,35 +171,35 @@ namespace paireddata
             }
             return true;
         }
+        private double[] ExceedanceToNonExceedance(double[] exceedanceProbabilities)
+        {
+            double[] nonExceedanceProbabilities = new double[exceedanceProbabilities.Length];
+            for (int i = 0; i < nonExceedanceProbabilities.Length; i++)
+            {
+                nonExceedanceProbabilities[i] = 1 - exceedanceProbabilities[i];
+            }
+            return nonExceedanceProbabilities;
+        }
 
         public IPairedData SamplePairedData(double probability)
         {
-            double[] y = new double[_NonMontonicDistributions.Length];
-            if (probability > 0.5)
+            double[] y = new double[_StageOrLogFlowDistributions.Length];
+            for (int i = 0; i < _NonExceedanceProbabilities.Length; i++)
             {
-                for (int i = 0; i < _ExceedanceProbabilities.Length; i++)
-                {
-                    y[i] = _DistributionsMonotonicFromAbove[i].InverseCDF(probability);
-                }
+                y[i] = _StageOrLogFlowDistributions[i].InverseCDF(probability);
             }
-            else
-            {
-                for (int i = 0; i < _ExceedanceProbabilities.Length; i++)
-                {
-                    y[i] = _DistributionsMonotonicFromBelow[i].InverseCDF(probability);
-                }
-            }
-            PairedData pairedData = new PairedData(_ExceedanceProbabilities, y, _metaData);
+            PairedData pairedData = new PairedData(_NonExceedanceProbabilities, y, _metaData);
             pairedData.Validate();
             if (pairedData.HasErrors)
             {
                 if (pairedData.RuleMap[nameof(pairedData.Yvals)].ErrorLevel > ErrorLevel.Unassigned)
                 {
                     pairedData.ForceMonotonic();
+                    ReportMessage(this, new MessageEventArgs(new Message("Sampled Y Values were not monotonically increasing as required and were forced to be monotonic")));
                 }
                 if (pairedData.RuleMap[nameof(pairedData.Xvals)].ErrorLevel > ErrorLevel.Unassigned)
                 {
-                    Array.Sort(pairedData.Xvals);//bad news.
+                    ReportMessage(this, new MessageEventArgs(new Message("X values are not monotonically decreasing as required")));
                 }
                 pairedData.Validate();
                 if (pairedData.HasErrors)
@@ -161,75 +209,106 @@ namespace paireddata
             }
             return pairedData;
         }
-        private ContinuousDistribution[] MakeMeMonotonicFromBelow(ContinuousDistribution[] flowOrStageDistributions, bool usingStagesNotFlows)
+        public void ReportMessage(object sender, MessageEventArgs e)
         {
-                double[] probsForChecking = new double[] { .45, .2, .1, .05, .02, .01, .005, .002 };
-                ContinuousDistribution[] monotonicDistributionArray = new ContinuousDistribution[flowOrStageDistributions.Length];
-                monotonicDistributionArray[0] = flowOrStageDistributions[0];
-
-                for (int j = 0; j < probsForChecking.Length; j++)
+            MessageReport?.Invoke(sender, e);
+        }
+        public bool Equals(GraphicalUncertainPairedData incomingGraphicalUncertainPairedData)
+        {
+            bool nullMatches = CurveMetaData.IsNull.Equals(incomingGraphicalUncertainPairedData.CurveMetaData.IsNull);
+            if(nullMatches && IsNull)
+            {
+                return true;
+            }
+            bool nameIsTheSame = Name.Equals(incomingGraphicalUncertainPairedData.Name);
+            bool erlIsTheSame = EquivalentRecordLength.Equals(incomingGraphicalUncertainPairedData.EquivalentRecordLength);
+            if (!nameIsTheSame || !erlIsTheSame)
+            {
+                return false;
+            }
+            for (int i = 0; i < _ExceedanceProbabilities.Length; i++)
+            {
+                bool probabilityIsTheSame = _ExceedanceProbabilities[i].Equals(incomingGraphicalUncertainPairedData.ExceedanceProbabilities[i]);
+                bool distributionIsTheSame = _StageOrLogFlowDistributions[i].Equals(incomingGraphicalUncertainPairedData.StageOrLogFlowDistributions[i]);
+                if(!probabilityIsTheSame || !distributionIsTheSame)
                 {
-                    double q = probsForChecking[j];
-                    double qComplement = 1 - q;
-                    for (int i = 1; i < flowOrStageDistributions.Length; i++)
-                    {
-                        double lowerBoundPreviousDistribution = monotonicDistributionArray[i - 1].InverseCDF(q);
-                        double lowerBoundCurrentDistribution = flowOrStageDistributions[i].InverseCDF(q);
-                        double lowerBoundDifference = lowerBoundCurrentDistribution - lowerBoundPreviousDistribution;
+                    return false;
+                }
+            }
+            return true;
+        }
+        public XElement WriteToXML()
+        {
+            XElement masterElement = new XElement("Graphical_Uncertain_Paired_Data");
+            XElement curveMetaDataElement = CurveMetaData.WriteToXML();
+            curveMetaDataElement.Name = "CurveMetaData";
+            masterElement.Add(curveMetaDataElement);
+            if(CurveMetaData.IsNull)
+            {
+                return masterElement;
+            }
+            else
+            {
+                masterElement.SetAttributeValue("Ordinate_Count", _ExceedanceProbabilities.Length);
+                masterElement.SetAttributeValue("ERL", EquivalentRecordLength);
+                masterElement.SetAttributeValue("Using_Stages_Not_Flows", _UsingStagesNotFlows);
+                masterElement.SetAttributeValue("Maximum_Probability", _MaximumProbability);
+                masterElement.SetAttributeValue("Minimum_Probability", _MinimumProbability);
+                XElement pairedDataElement = new XElement("Coordinates");
+                for (int i = 0; i < _ExceedanceProbabilities.Length; i++)
+                {
+                    XElement rowElement = new XElement("Coordinate");
+                    XElement xElement = new XElement("X");
+                    xElement.SetAttributeValue("Value", _ExceedanceProbabilities[i]);
+                    XElement yElement = StageOrLogFlowDistributions[i].ToXML();
+                    rowElement.Add(xElement);
+                    rowElement.Add(yElement);
+                    pairedDataElement.Add(rowElement);
+                }
+                masterElement.Add(pairedDataElement);
+                return masterElement;
+            }
 
-                        if (lowerBoundDifference < 0)
+        }
+
+        public static GraphicalUncertainPairedData ReadFromXML(XElement xElement)
+        {
+            CurveMetaData metaData = CurveMetaData.ReadFromXML(xElement.Element("CurveMetaData"));
+            if (metaData.IsNull)
+            {
+                return new GraphicalUncertainPairedData();
+            }
+            else
+            {
+                int equivalentRecordLength = Convert.ToInt32(xElement.Attribute("ERL").Value);
+                bool usingStagesNotFlows = Convert.ToBoolean(xElement.Attribute("Using_Stages_Not_Flows").Value);
+                double minimumProbability = Convert.ToDouble(xElement.Attribute("Minimum_Probability").Value);
+                double maximumProbability = Convert.ToDouble(xElement.Attribute("Maximum_Probability").Value);
+                int size = Convert.ToInt32(xElement.Attribute("Ordinate_Count").Value);
+                double[] exceedanceProbabilities = new double[size];
+                Normal[] stageOrFlowDistributions = new Normal[size];
+                int i = 0;
+                foreach (XElement coordinateElement in xElement.Element("Coordinates").Elements())
+                {
+                    foreach (XElement ordinateElements in coordinateElement.Elements())
+                    {
+                        if (ordinateElements.Name.ToString().Equals("X"))
                         {
-                            if (usingStagesNotFlows)
-                        {
-                            monotonicDistributionArray[i] = new Normal(((Normal)flowOrStageDistributions[i]).Mean, ((Normal)monotonicDistributionArray[i - 1]).StandardDeviation, flowOrStageDistributions[i].SampleSize);
-                        } else
-                        {
-                            monotonicDistributionArray[i] = new LogNormal(((LogNormal)flowOrStageDistributions[i]).Mean, ((LogNormal)monotonicDistributionArray[i - 1]).StandardDeviation, flowOrStageDistributions[i].SampleSize);
+                            exceedanceProbabilities[i] = Convert.ToDouble(ordinateElements.Attribute("Value").Value);
                         }
-                    }
                         else
                         {
-                            monotonicDistributionArray[i] = flowOrStageDistributions[i];
+                            stageOrFlowDistributions[i] = (Normal)Statistics.ContinuousDistribution.FromXML(ordinateElements);
                         }
                     }
+                    i++;
                 }
-                return monotonicDistributionArray;
+                return new GraphicalUncertainPairedData(exceedanceProbabilities, stageOrFlowDistributions, equivalentRecordLength, metaData, usingStagesNotFlows, maximumProbability, minimumProbability);
             }
 
-        private ContinuousDistribution[] MakeMeMonotonicFromAbove(ContinuousDistribution[] flowOrStageDistributions, bool usingStagesNotFlows)
-        {
-            double[] probsForChecking = new double[] { .55, .8, .9, .95, .98, .99, .995, .998 };
-            ContinuousDistribution[] monotonicDistributionArray = new ContinuousDistribution[flowOrStageDistributions.Length];
-            monotonicDistributionArray[0] = flowOrStageDistributions[0];
-
-            for (int j = 0; j < probsForChecking.Length; j++)
-            {
-                double q = probsForChecking[j];
-                for (int i = 1; i < flowOrStageDistributions.Length; i++)
-                {
-
-                    double upperBoundPreviousDistribution = monotonicDistributionArray[i - 1].InverseCDF(q);
-                    double upperBoundCurrentDistribution = flowOrStageDistributions[i].InverseCDF(q);
-                    double upperBoundDifference = upperBoundCurrentDistribution - upperBoundPreviousDistribution;
-
-                    if (upperBoundDifference < 0)
-                    {   if(usingStagesNotFlows)
-                        {
-                            monotonicDistributionArray[i] = new Normal(((Normal)flowOrStageDistributions[i]).Mean, ((Normal)monotonicDistributionArray[i - 1]).StandardDeviation, flowOrStageDistributions[i].SampleSize);
-                        }
-                    else
-                        {
-                            monotonicDistributionArray[i] = new LogNormal(((LogNormal)flowOrStageDistributions[i]).Mean, ((LogNormal)monotonicDistributionArray[i - 1]).StandardDeviation, flowOrStageDistributions[i].SampleSize);
-                        }
-                    }
-                    else
-                    {
-                        monotonicDistributionArray[i] = flowOrStageDistributions[i];
-                    }
-                }
-            }
-            return monotonicDistributionArray;
         }
         #endregion
     }
-}
+    }
+
+

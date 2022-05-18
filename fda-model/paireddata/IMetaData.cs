@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace paireddata
 {
-    public enum CurveTypesEnum
-    {
-        MonotonicallyIncreasing,
-        StrictlyMonotonicallyIncreasing,
-        Unassigned
-
-    }
+ public interface IMetaData
+{
+        CurveMetaData CurveMetaData { get; }
+}
 }
