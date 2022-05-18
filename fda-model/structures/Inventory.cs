@@ -37,14 +37,12 @@ namespace structures
                 int pop2amo65 = (int)row["pop2amo65"];
                 int pop2pmu65 = (int)row["pop2pmu65"];
                 int pop2pmo65 = (int)row["pop2pmo65"];
-                int cbfips = (int)row["cbfips"];
+                string cbfips = (string)row["cbfips"];
                 int impactAreaID = GetImpactAreaID(point,  impactAreaShapefilePath);
-                _structures.Add(new Structure(fid, point, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65, cbfips));
+                _structures.Add(new Structure(fid, point, found_ht, val_struct, val_cont, val_vehic, st_damcat, occtype, pop2amu65, pop2amo65, pop2pmu65, pop2pmo65, impactAreaID, cbfips));
             }
         }
         // Will need a constructor/load from Database ; 
-
-        // add method to attach impact area index to a structure 
 
 
         public Inventory(List<Structure> structures, OccupancyTypeSet occTypes)
@@ -87,7 +85,7 @@ namespace structures
                 if (polygons[i].Contains(point))
                 {
                     var row = polygonFeatureLayer.FeatureRow(i);
-                    return (int)row["fd_id"];
+                    return (int)row["FID"];
                 }
             }
             return -9999;

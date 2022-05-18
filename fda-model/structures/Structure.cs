@@ -25,9 +25,8 @@ namespace structures
         private int _pop2pmu65;
         private int _pop2pmo65;
         private int _impactAreaID;
-        private int _cbdID;
+        private string _cbdID;
 
-        // ADD AN IMPACT AREA ID
         public PointM XYPoint 
         {
             get {return _point; }
@@ -35,7 +34,7 @@ namespace structures
 
 
         //This parameter list lines up with columnsOfInterest in the Inventory 
-        public Structure(int name, PointM point , double foundationHeightMean,double structureValue, double contentValue, double vehicleValue, string damCat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pm065, int impactAreaID, int censusBlockID)
+        public Structure(int name, PointM point , double foundationHeightMean,double structureValue, double contentValue, double vehicleValue, string damCat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pm065, int impactAreaID, string censusBlockID)
         {
             _fdid = name;
             _point = point;
@@ -53,9 +52,6 @@ namespace structures
             _cbdID = censusBlockID;
         }
 
-        public Structure(int fid, PointM point, double found_ht, double val_struct, double val_cont, double val_vehic, string st_damcat, string occtype, int pop2amu65, int pop2amo65, int pop2pmu65, int pop2pmo65, int cbfips)
-        {
-        }
 
         public string DamCatName { get { return _damcat_name; } }
         public string OccTypeName { get { return _occtype_name; } }
