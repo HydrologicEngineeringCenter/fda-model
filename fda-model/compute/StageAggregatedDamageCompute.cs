@@ -48,32 +48,11 @@ namespace fda_model.compute
                             StructureDamageResult results = sampledInventory.Inventory[j].ComputeDamage(depths[j]);
                             //add result to proper damage result
                         }
-
                         //this is the loop where we want to load up the histogram with damages by catagory, impact area
                     }
                 }
             }
-
-            
-            
-
         }
-
-
-
-        //private PairedData AssociateIndexPointWithProbabilities(PointM indexPoint)
-        //{
-        //    PointMs indexPointMs = new PointMs();
-        //    indexPointMs.Add(indexPoint);
-        //   List<double[]> points = _hydraulics.GetHydraulicDataFromUnsteadyHDFs(indexPointMs);
-        //    double[] depths = new double[points.Count];
-        //    for(int i = 0; i < points.Count; i++)
-        //    {
-        //        depths[i] = points[i][0];
-        //    }
-        //    return new PairedData(_hydraulics.Probabilities.ToArray(),depths);
-        //}
-
         private PairedData GetStageAggDamCurves(IList<IList<StructureDamageResult>> structureDamageResults, PairedData indexPoint)
         {
             return null;
