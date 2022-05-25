@@ -51,11 +51,11 @@ namespace fda_model_test_unittests
             List<HydraulicProfile> profiles = new List<HydraulicProfile>();
             for(int i = 0; i < resultsFiles.Length; i++)
             {
-             profiles.Add(new HydraulicProfile(probabilities[i],resultsFiles[i],terrainFile));
+             profiles.Add(new HydraulicProfile(probabilities[i],resultsFiles[i],terrainFile, fda_model.hydraulics.enums.HydraulicDataSource.UnsteadyHDF));
             }
             HydraulicDataset dataset = new HydraulicDataset(profiles);
             Inventory inventory = new Inventory(SIFile,impactAreaFile);
-            float[] depths = dataset.HydraulicProfiles[0].GetHydraulicDataFromUnsteadyHDFs(inventory.GetPointMs());
+            float[] depths = dataset.HydraulicProfiles[0].GetDepths(inventory.GetPointMs());
             Console.WriteLine("we did it!");
         }
     }
