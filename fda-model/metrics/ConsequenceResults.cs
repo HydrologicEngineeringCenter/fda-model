@@ -15,7 +15,7 @@ namespace metrics
         #region Fields
         private List<ConsequenceResult> _consequenceResultList;
         //impact area to be string?
-        private int _regionID;//impact area ID or census block ID
+        private string _regionID;//impact area ID or census block ID
         private bool _isNull;
         #endregion
 
@@ -48,15 +48,15 @@ namespace metrics
         public ConsequenceResults()
         {
             _consequenceResultList = new List<ConsequenceResult>();
-            _regionID = 0;
+            _regionID = "unassigned";
             _isNull = true;
         }
-        public ConsequenceResults(int impactAreaID){
+        public ConsequenceResults(string impactAreaID){
             _consequenceResultList = new List<ConsequenceResult>();
             _regionID = impactAreaID;
             _isNull = false;
         }
-        private ConsequenceResults(List<ConsequenceResult> damageResults, int impactAreaID)
+        private ConsequenceResults(List<ConsequenceResult> damageResults, string impactAreaID)
         {
             _consequenceResultList = damageResults;
             _regionID = impactAreaID;

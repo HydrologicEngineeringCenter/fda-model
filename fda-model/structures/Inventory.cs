@@ -12,6 +12,23 @@ namespace structures
         private List<Structure> _structures;
         private OccupancyTypeSet _Occtypes;
 
+        public List<Structure> Structures { get; set; }
+        public List<string> ImpactAreas { 
+            get
+            {
+                List<string> impactAreas = new List<string>();
+                foreach(var structure in Structures)
+                {
+                    if (!impactAreas.Contains(structure.ImpactAreaID.ToString()))
+                    {
+                        impactAreas.Add(structure.ImpactAreaID.ToString());
+                    }
+                }
+                return impactAreas;
+            } 
+        }
+
+
         /// <summary>
         /// Constructor to create a SI from a shapefile. Gonna need to do this from database potentially as well
         /// </summary>

@@ -11,7 +11,11 @@ namespace structures
         private readonly double _StructureDamage;
         private readonly double _ContentDamage;
         private readonly double _OtherDamage;
-        //need getters
+
+        public double StructureDamage { get; set; }
+        public double ContentDamage { get; set; }
+        public double OtherDamage { get; set; }
+
         public StructureDamageResult(double structuredamage, double contentdamage, double otherdamage)
         {
             _StructureDamage = structuredamage;
