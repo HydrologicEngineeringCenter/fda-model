@@ -27,6 +27,7 @@ namespace structures
         private string _impactAreaID;
         private string _cbdID;
         private int _yearInService;
+        private List<double> _computeStages;
 
         public PointM XYPoint 
         {

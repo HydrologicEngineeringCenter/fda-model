@@ -118,9 +118,19 @@ namespace fda_model.compute
             {
                 stagesForCompute[i] = LowestStage + (HighestStage - LowestStage) /desiredOrdinates*i;
             }
+            //get depth for smallest event
+            float[] smallestEventDepths = _hydraulics.HydraulicProfiles[0].GetDepths(_inventory.GetPointMs()); // need to ensure the first profile is the smallest. 
 
-            //get distance between the lowest stage and the .5 and the distance between the highest and the .002 
-          
+            //Create lists to store damage
+            //We're going to need to filter the structure inventory to a distinct impact area because hydraulic relationships change for each one. We're going to store a list a Histogram Uncertain Paired Data for each possible DamCat, AssetCatagory(there's 4 of these
+            //but they might not all be used. We can write a method on Inventory to pull unique damCats from the list of structures. 
+            List<paireddata.HistogramUncertainPairedData> histogramUncertainPairedData = new list<paireddata.HistogramUncertainPairedData(stagesForCompute,new CurveMetaData()>;
+            histogramUncertainPairedData.Xvals = stagesForCompute;
+            for(int i = 0; i < smallestEventDepths.Length; i++)
+            {
+
+            }
+
 
             Random randomNumberGenerator = new Random(seed);
             //get the XYs off the inventory 
