@@ -8,6 +8,8 @@ using fda_model.metrics;
 using metrics;
 using Statistics;
 using Statistics.Distributions;
+using fda_model.paireddata;
+using Statistics.Histograms;
 
 namespace fda_model.compute
 {
@@ -27,7 +29,7 @@ namespace fda_model.compute
         private double HighestDelta; //Difference between the highest stage and .002
 
 
-        public StageAggregatedDamageCompute(Inventory inventory, HydraulicDataset hydraulics, int analysisYear, double priceIndex, LogPearson3 flowFrequency,UncertainPairedData stageFlow)
+        public StageAggregatedDamageCompute(Inventory inventory, HydraulicDataset hydraulics, int analysisYear, double priceIndex, LogPearson3 flowFrequency, UncertainPairedData stageFlow)
         {
             _inventory = inventory;
             _hydraulics = hydraulics;
@@ -96,7 +98,7 @@ namespace fda_model.compute
             {
                 //Graphical Stage
                 LowestStage = _graphicalStageFrequency.StageOrLogFlowDistributions[0].InverseCDF(.0001);
-                HighestStage = _graphicalStageFrequency.StageOrLogFlowDistributions[_graphicalStageFrequency.StageOrLogFlowDistributions.Length-1].InverseCDF(.9999);
+                HighestStage = _graphicalStageFrequency.StageOrLogFlowDistributions[_graphicalStageFrequency.StageOrLogFlowDistributions.Length - 1].InverseCDF(.9999);
 
                 IPairedData medianCurve = _graphicalStageFrequency.SamplePairedData(.5);
                 double twoYearStage = medianCurve.f(.5);
@@ -116,17 +118,98 @@ namespace fda_model.compute
             stagesForCompute[0] = LowestStage;
             for (int i = 1; i < desiredOrdinates; i++)
             {
-                stagesForCompute[i] = LowestStage + (HighestStage - LowestStage) /desiredOrdinates*i;
+                stagesForCompute[i] = LowestStage + (HighestStage - LowestStage) / desiredOrdinates * i;
             }
             //get depth for smallest event
             float[] smallestEventDepths = _hydraulics.HydraulicProfiles[0].GetDepths(_inventory.GetPointMs()); // need to ensure the first profile is the smallest. 
 
+            //get just the structures for a certain 
+
             //Create lists to store damage
             //We're going to need to filter the structure inventory to a distinct impact area because hydraulic relationships change for each one. We're going to store a list a Histogram Uncertain Paired Data for each possible DamCat, AssetCatagory(there's 4 of these
-            //but they might not all be used. We can write a method on Inventory to pull unique damCats from the list of structures. 
-            List<paireddata.HistogramUncertainPairedData> histogramUncertainPairedData = new list<paireddata.HistogramUncertainPairedData(stagesForCompute,new CurveMetaData()>;
+            //but they might not all be used. 
+            List<HistogramUncertainPairedData> histogramUncertainPairedDataList = new List<HistogramUncertainPairedData>();// this is a list of histogram uncertain paired data for each index catagory, damage catagory, asset catagory.
+
+            for (int c = 0; c < stagesForCompute.Length; c++)
+            {
+                //Uncertainty around percentDamageCurves
+                for (int i = 0; i < iterations; i++)
+                {
+                    DeterministicInventory sampledInventory = _inventory.Sample(seed);
+                    List<StructureDamageResult> results = sampledInventory.ComputeDamages(smallestEventDepths);
+                    Dictionary<string, StructureDamageResult> aggregatedResults = new Dictionary<string, StructureDamageResult>();
+                    for (int j = 0; j < results.Count; j++)
+                    {
+                        string impactArea = _inventory.Structures[j].ImpactAreaID;
+                        string damcatName = _inventory.Structures[j].DamCatName;
+                        string dictionaryKey = impactArea + "-" + damcatName;
+
+                        if (aggregatedResults.ContainsKey(dictionaryKey))
+                        {
+                            aggregatedResults[dictionaryKey].AddResult(results[j]);
+                        }
+                        else
+                        {
+                            aggregatedResults.Add(dictionaryKey, results[j]);
+                        }
+                    }
+                    foreach (string impactAreaDamCat in aggregatedResults.Keys)
+                    {
+                        string[] splitString = impactAreaDamCat.Split('-');
+                        string impactArea = splitString[0];
+                        string damcatName = splitString[1];
+
+                        if (histogramUncertainPairedDataList.Count == 0)
+                        {
+                            CreateEmptyHistograms(stagesForCompute, smallestEventDepths, ref histogramUncertainPairedDataList, impactArea, damcatName);
+                        }
+                        else
+                        {
+                            bool foundHistogram = false;
+                            foreach (HistogramUncertainPairedData histogramUncertainPairedData in histogramUncertainPairedDataList)
+                            {
+                                if (histogramUncertainPairedData.CurveMetaData.Name == impactArea && histogramUncertainPairedData.DamageCategory == damcatName)
+                                {
+                                    foundHistogram = true;
+                                    switch (histogramUncertainPairedData.AssetCategory)
+                                    {
+                                        case "Structure":
+                                            histogramUncertainPairedData.Yvals[c].AddObservationToHistogram(aggregatedResults[impactAreaDamCat].StructureDamage, i);
+                                            break;
+                                        case "Content":
+                                            histogramUncertainPairedData.Yvals[c].AddObservationToHistogram(aggregatedResults[impactAreaDamCat].ContentDamage, i);
+                                            break;
+                                        case "Other":
+                                            histogramUncertainPairedData.Yvals[c].AddObservationToHistogram(aggregatedResults[impactAreaDamCat].OtherDamage, i);
+                                            break;
+                                    }
+                                }
+                            }
+                            if (foundHistogram)
+                            {
+
+                            }
+
+                        }
+
+
+                    }
+                }
+            }
+
+
+
+
+
+
+            foreach (Structure structure in _inventory.Structures)
+            {
+
+                List<string> assetCatagories = new List<string>();
+                foreach (string assetcat in structure.)
+            }
             histogramUncertainPairedData.Xvals = stagesForCompute;
-            for(int i = 0; i < smallestEventDepths.Length; i++)
+            for (int i = 0; i < smallestEventDepths.Length; i++)
             {
 
             }
@@ -146,7 +229,7 @@ namespace fda_model.compute
                 //get depths for all structure in the inventory 
                 float[] depths = set.GetDepths(structurePoints);
                 Dictionary<string, ConsequenceResults> resultsDictionary = new Dictionary<string, ConsequenceResults>();
-                
+
                 //add uncertainty 
                 for (int i = 0; i < iterations; i++)
                 {
@@ -156,23 +239,37 @@ namespace fda_model.compute
                     List<StructureDamageResult> damages = (List<StructureDamageResult>)sampledInventory.ComputeDamages(depths);
                     sortResultsIntoObjects(damages, ref resultsDictionary);
                 }
-               
+
             }
         }
 
-        private void sortResultsIntoObjects(List<StructureDamageResult> results, ref Dictionary<string, ConsequenceResults> resultsDictionary )
+        private void CreateEmptyHistograms(double[] stagesForCompute, float[] smallestEventDepths, ref List<HistogramUncertainPairedData> histogramUncertainPairedDataList, string impactArea, string damcatName)
+        {
+
+            ThreadsafeInlineHistogram[] threadsafeInlineHistograms = new ThreadsafeInlineHistogram[stagesForCompute.Length];
+            for (int k = 0; k < stagesForCompute.Length; k++)
+            {
+                ThreadsafeInlineHistogram histogram = new ThreadsafeInlineHistogram(new ConvergenceCriteria());
+                threadsafeInlineHistograms[k] = histogram;
+            }
+            histogramUncertainPairedDataList.Add(new HistogramUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Structure")));
+            histogramUncertainPairedDataList.Add(new HistogramUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Content")));
+            histogramUncertainPairedDataList.Add(new HistogramUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Other")));
+        }
+
+        private void sortResultsIntoObjects(List<StructureDamageResult> results, ref Dictionary<string, ConsequenceResults> resultsDictionary)
         {
             //dictionary will store the ConsequenceResults objects for each impact area
-            
+
 
             //for each structure 
-            for(int i=0; i<_inventory.GetPointMs().Count; i++)
+            for (int i = 0; i < _inventory.GetPointMs().Count; i++)
             {
                 //create the individual consequence result objects
                 Structure thisStructure = _inventory.Structures[i];
                 ConsequenceResult structureResult = new ConsequenceResult(thisStructure.DamCatName, "StructureDamage", new Statistics.ConvergenceCriteria());
-                ConsequenceResult contentResult =   new ConsequenceResult(thisStructure.DamCatName, "ContentDamage", new Statistics.ConvergenceCriteria());
-                ConsequenceResult vehicleResult =   new ConsequenceResult(thisStructure.DamCatName, "VehicleDamage", new Statistics.ConvergenceCriteria());
+                ConsequenceResult contentResult = new ConsequenceResult(thisStructure.DamCatName, "ContentDamage", new Statistics.ConvergenceCriteria());
+                ConsequenceResult vehicleResult = new ConsequenceResult(thisStructure.DamCatName, "VehicleDamage", new Statistics.ConvergenceCriteria());
 
                 //add the data to them
                 structureResult.AddConsequenceRealization(results[i].StructureDamage, 0);
@@ -184,7 +281,7 @@ namespace fda_model.compute
                 {
                     //add it
                     resultsDictionary.Add(thisStructure.ImpactAreaID, new ConsequenceResults(thisStructure.ImpactAreaID));
-                    
+
                 }
                 //and fill it
                 resultsDictionary[thisStructure.ImpactAreaID].AddConsequenceResult(structureResult);
