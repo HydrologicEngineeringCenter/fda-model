@@ -10,7 +10,7 @@ namespace structures
         {
             Inventory = inventorySample;
         }
-        public IList<StructureDamageResult> ComputeDamages(float[] depths)
+        public List<StructureDamageResult> ComputeDamages(float[] depths)
         {
             //assume each structure has a corresponding index to the depth
             List<StructureDamageResult> results = new List<StructureDamageResult>();
