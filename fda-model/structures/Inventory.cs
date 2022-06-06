@@ -11,7 +11,6 @@ namespace structures
 {
         private List<Structure> _structures;
         private OccupancyTypeSet _Occtypes;
-
         public List<Structure> Structures { get; set; }
         public List<string> ImpactAreas { 
             get
@@ -26,6 +25,22 @@ namespace structures
                 }
                 return impactAreas;
             } 
+        }
+        public List<string> GetUniqueDamageCatagories()
+        {
+            List<string> damageCatagories = new List<string>();
+            foreach(Structure structure in Structures)
+            {
+                if (damageCatagories.Contains(structure.DamCatName))
+                {
+                    continue;
+                }
+                else
+                {
+                    damageCatagories.Add(structure.DamCatName);
+                }
+            }
+            return damageCatagories;
         }
 
 
