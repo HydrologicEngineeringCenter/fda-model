@@ -24,10 +24,16 @@
 
         public StructureDamageResult ComputeDamage(float depth)
         {
+            //TODO: fix structure damage result return
             double depthabovefoundHeight = depth - _foundationHeight;
             double structDamagepercent = _occtype.StructureDamageFunction.f(depthabovefoundHeight);
             double structDamage = structDamagepercent * _StructureValue;
-            return new StructureDamageResult(structDamage,structDamage,structDamage);
+
+            double contentDamage = 9999;
+
+            double otherDamage = 9999;
+
+            return new StructureDamageResult(structDamage, contentDamage, otherDamage);
         }
     }
 }
