@@ -53,8 +53,6 @@ namespace structures
             _impactAreaID = impactAreaID;
             _cbdID = censusBlockID;
         }
-
-
         public string DamCatName { get { return _damcat_name; } }
         public string OccTypeName { get { return _occtype_name; } }
         public DeterministicStructure Sample(int seed, DeterministicOccupancyType occtype)
