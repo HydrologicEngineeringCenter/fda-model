@@ -10,12 +10,11 @@ using Statistics;
 using compute;
 using Statistics.Histograms;
 using System.Xml.Linq;
-using metrics;
 
 namespace fda_model_test.unittests
 {
     public class ExpectedAnnualDamageResultsShould
-    {//TODO: Access the requisite logic through Scenario results 
+    {
         static double[] Flows = { 0, 100000 };
         static double[] Stages = { 0, 150000 };
         static string xLabel = "x label";
@@ -33,7 +32,7 @@ namespace fda_model_test.unittests
         public void SerializationShouldReadTheSameObjectItWrites(int seed, int iterations)
         {
 
-            ContinuousDistribution flow_frequency = new Uniform(0, 100000, 1000);
+            Statistics.ContinuousDistribution flow_frequency = new Uniform(0, 100000, 1000);
             //create a stage distribution
             IDistribution[] stages = new IDistribution[2];
             for (int i = 0; i < 2; i++)
@@ -57,9 +56,9 @@ namespace fda_model_test.unittests
                 .build();
             RandomProvider randomProvider = new RandomProvider(seed);
             ConvergenceCriteria convergenceCriteria = new ConvergenceCriteria(minIterations: iterations, maxIterations: iterations);
-            ImpactAreaScenarioResults results = simulation.Compute(randomProvider, convergenceCriteria);
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(randomProvider, convergenceCriteria);
             XElement xElement = results.ConsequenceResults.WriteToXML();
-            ConsequenceResults expectedAnnualDamageResultsFromXML = ConsequenceResults.ReadFromXML(xElement);
+            metrics.ConsequenceResults expectedAnnualDamageResultsFromXML = metrics.ConsequenceResults.ReadFromXML(xElement);
             bool success = results.ConsequenceResults.Equals(expectedAnnualDamageResultsFromXML);
             Assert.True(success);
         }

@@ -19,11 +19,18 @@
 
     <PackageReference Include="HEC.MVVMFramework.Model" Version="1.0.0-alpha-2022.2.15.2147" />
 
+    <PackageReference Include="RASMapperLibDistro6.2" Version="0.0.1" />
+
   </ItemGroup>
 
 	
   <ItemGroup>
     <ProjectReference Include="..\Statistics\Statistics.csproj" />
+  </ItemGroup>
+
+	
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
 </Project>
