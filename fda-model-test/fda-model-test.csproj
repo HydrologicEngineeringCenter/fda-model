@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <RootNamespace>fda_model_test</RootNamespace>
+	  <OutputPath>..\Build\FDA2.0</OutputPath>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

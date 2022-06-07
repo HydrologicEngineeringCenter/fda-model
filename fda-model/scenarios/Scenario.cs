@@ -9,7 +9,7 @@ namespace scenarios
 {
     public class Scenario
     {
-        private int _year;
+        private Int64 _year;
         private IList<ImpactAreaScenarioSimulation> _impactAreaSimulations;
         //probably need getters and setters
         public IList<ImpactAreaScenarioSimulation> ImpactAreaSimulations
@@ -19,15 +19,14 @@ namespace scenarios
                 return _impactAreaSimulations;
             }
         }
-        public int Year
-        {
+        public Int64 Year{
             get{return _year;}
         }
         public IList<ImpactAreaScenarioSimulation> ImpactAreas
         {
             get { return _impactAreaSimulations;  }
         }
-        public Scenario(int year, IList<ImpactAreaScenarioSimulation> impactAreaSimulations){
+        public Scenario(Int64 year, IList<ImpactAreaScenarioSimulation> impactAreaSimulations){
             _year = year;
             _impactAreaSimulations = impactAreaSimulations;
         }

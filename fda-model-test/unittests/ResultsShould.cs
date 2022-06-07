@@ -8,14 +8,13 @@ using Statistics;
 using paireddata;
 using compute;
 using System.Xml.Linq;
-using metrics;
 
 namespace fda_model_test.unittests
 {
     [Trait("Category", "Unit")]
 
-    public class ImpactAreaScenarioResultsShould
-    {//TODO: Access these results through ScenarioREsults 
+    public class ResultsShould
+    {
         static double[] Flows = { 0, 100000 };
         static double[] Stages = { 0, 150000 };
         static string xLabel = "x label";
@@ -47,17 +46,17 @@ namespace fda_model_test.unittests
             List<UncertainPairedData> stageDamageList = new List<UncertainPairedData>();
             stageDamageList.Add(stage_damage);
 
-            Threshold threshold = new Threshold(1, convergenceCriteria, ThresholdEnum.ExteriorStage, 150000);//do we want to access this through _results?
+            metrics.Threshold threshold = new metrics.Threshold(1, convergenceCriteria, metrics.ThresholdEnum.ExteriorStage, 150000);//do we want to access this through _results?
             ImpactAreaScenarioSimulation simulation = ImpactAreaScenarioSimulation.builder(id)
                 .withFlowFrequency(flow_frequency)
                 .withFlowStage(flow_stage)
                 .withStageDamages(stageDamageList)
                 .withAdditionalThreshold(threshold)
                 .build();
-            MeanRandomProvider meanRandomProvider = new MeanRandomProvider();
-            ImpactAreaScenarioResults results = simulation.Compute(meanRandomProvider, convergenceCriteria); //here we test compute, below we test preview compute 
+            compute.MeanRandomProvider meanRandomProvider = new MeanRandomProvider();
+            metrics.ImpactAreaScenarioResults results = simulation.Compute(meanRandomProvider, convergenceCriteria); //here we test compute, below we test preview compute 
             XElement resultsElement = results.WriteToXml();
-            IContainImpactAreaScenarioResults resultsFromXML = ImpactAreaScenarioResults.ReadFromXML(resultsElement);
+            metrics.IContainResults resultsFromXML = metrics.ImpactAreaScenarioResults.ReadFromXML(resultsElement);
             bool success = results.Equals(resultsFromXML);
         }
     }
