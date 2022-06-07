@@ -28,7 +28,16 @@ namespace fda_model.compute
         private double LowDelta; //Difference between the lowest stage and .5
         private double HighestDelta; //Difference between the highest stage and .002
 
-
+        #region Constructors
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inventory"> Represents the inventory for a specific impact area</param>
+        /// <param name="hydraulics"></param>
+        /// <param name="analysisYear"></param>
+        /// <param name="priceIndex"></param>
+        /// <param name="flowFrequency"> Represents the flow frequency relationship for the particular impact area</param>
+        /// <param name="stageFlow"> Represents the stage - flow relationship for the particular impact area</param>
         public StageAggregatedDamageCompute(Inventory inventory, HydraulicDataset hydraulics, int analysisYear, double priceIndex, LogPearson3 flowFrequency, UncertainPairedData stageFlow)
         {
             _inventory = inventory;
@@ -57,6 +66,7 @@ namespace fda_model.compute
             _priceIndex = priceIndex;
             _graphicalStageFrequency = stageFrequency;
         }
+        #endregion
 
         private void GetRangeOfFlows()
         {
@@ -108,6 +118,11 @@ namespace fda_model.compute
             }
         }
 
+        /// <summary>
+        /// Specific to an impact area
+        /// </summary>
+        /// <param name="seed"></param>
+        /// <param name="iterations"></param>
         private void Compute(int seed, int iterations)
         {
             GetRangeOfFlows();
@@ -123,12 +138,10 @@ namespace fda_model.compute
             //get depth for smallest event
             float[] smallestEventDepths = _hydraulics.HydraulicProfiles[0].GetDepths(_inventory.GetPointMs()); // need to ensure the first profile is the smallest. 
 
-            //get just the structures for a certain 
-
             //Create lists to store damage
             //We're going to need to filter the structure inventory to a distinct impact area because hydraulic relationships change for each one. We're going to store a list a Histogram Uncertain Paired Data for each possible DamCat, AssetCatagory(there's 4 of these
             //but they might not all be used. 
-            List<HistogramUncertainPairedData> histogramUncertainPairedDataList = new List<HistogramUncertainPairedData>();// this is a list of histogram uncertain paired data for each index catagory, damage catagory, asset catagory.
+            List<ConsequenceResultsUncertainPairedData> histogramUncertainPairedDataList = new List<ConsequenceResultsUncertainPairedData>();// this is a list of histogram uncertain paired data for each index catagory, damage catagory, asset catagory.
 
             for (int c = 0; c < stagesForCompute.Length; c++)
             {
@@ -166,7 +179,7 @@ namespace fda_model.compute
                         else
                         {
                             bool foundHistogram = false;
-                            foreach (HistogramUncertainPairedData histogramUncertainPairedData in histogramUncertainPairedDataList)
+                            foreach (ConsequenceResultsUncertainPairedData histogramUncertainPairedData in histogramUncertainPairedDataList)
                             {
                                 if (histogramUncertainPairedData.CurveMetaData.Name == impactArea && histogramUncertainPairedData.DamageCategory == damcatName)
                                 {
@@ -243,7 +256,7 @@ namespace fda_model.compute
             }
         }
 
-        private void CreateEmptyHistograms(double[] stagesForCompute, float[] smallestEventDepths, ref List<HistogramUncertainPairedData> histogramUncertainPairedDataList, string impactArea, string damcatName)
+        private void CreateEmptyHistograms(double[] stagesForCompute, float[] smallestEventDepths, ref List<ConsequenceResultsUncertainPairedData> histogramUncertainPairedDataList, string impactArea, string damcatName)
         {
 
             ThreadsafeInlineHistogram[] threadsafeInlineHistograms = new ThreadsafeInlineHistogram[stagesForCompute.Length];
@@ -252,9 +265,9 @@ namespace fda_model.compute
                 ThreadsafeInlineHistogram histogram = new ThreadsafeInlineHistogram(new ConvergenceCriteria());
                 threadsafeInlineHistograms[k] = histogram;
             }
-            histogramUncertainPairedDataList.Add(new HistogramUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Structure")));
-            histogramUncertainPairedDataList.Add(new HistogramUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Content")));
-            histogramUncertainPairedDataList.Add(new HistogramUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Other")));
+            histogramUncertainPairedDataList.Add(new ConsequenceResultsUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Structure")));
+            histogramUncertainPairedDataList.Add(new ConsequenceResultsUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Content")));
+            histogramUncertainPairedDataList.Add(new ConsequenceResultsUncertainPairedData(stagesForCompute, threadsafeInlineHistograms, new CurveMetaData("Stages", "Damages", impactArea, damcatName, CurveTypesEnum.MonotonicallyIncreasing, "Other")));
         }
 
         private void sortResultsIntoObjects(List<StructureDamageResult> results, ref Dictionary<string, ConsequenceResults> resultsDictionary)

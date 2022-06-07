@@ -12,14 +12,15 @@ using HEC.MVVMFramework.Base.Implementations;
 using HEC.MVVMFramework.Base.Enumerations;
 using interfaces;
 using HEC.MVVMFramework.Base.Interfaces;
+using metrics;
 
 namespace fda_model.paireddata
 {
-    internal class HistogramUncertainPairedData : Validation, IPairedDataProducer, ICanBeNull, IReportMessage
+    internal class ConsequenceResultsUncertainPairedData : Validation, IPairedDataProducer, ICanBeNull, IReportMessage
     {
         #region Fields 
         private double[] _xvals;//Each of the compute stages for a structure
-        private ThreadsafeInlineHistogram[] _yvals; //Histogram of damages for that stage
+        private ConsequenceResults[] _yvals; //Histogram of damages for that stage
         private CurveMetaData _metadata;
         #endregion
 
@@ -62,7 +63,7 @@ namespace fda_model.paireddata
         {
             get { return _xvals; }
         }
-        public ThreadsafeInlineHistogram[] Yvals
+        public ConsequenceResults[] Yvals
         {
             get { return _yvals; }
         }
@@ -71,53 +72,28 @@ namespace fda_model.paireddata
         #endregion
 
         #region Constructors 
-        public HistogramUncertainPairedData()
+        public ConsequenceResultsUncertainPairedData()
         {
-            _metadata = new CurveMetaData();
             AddRules();
+        }
+        public ConsequenceResultsUncertainPairedData(double[] xs, ConsequenceResults[] ys)
+        {
+            _xvals = xs;
+            _yvals = ys;
 
-
-        }
-        [Obsolete("This constructor is deprecated. Construct a CurveMetaData, then inject into constructor")]
-        public HistogramUncertainPairedData(double[] xs, ThreadsafeInlineHistogram[] ys, string xlabel, string ylabel, string name)
-        {
-            _xvals = xs;
-            _yvals = ys;
-            _metadata = new CurveMetaData(xlabel, ylabel, name);
-            AddRules();
-        }
-        [Obsolete("This constructor is deprecated. Construct a CurveMetaData, then inject into constructor")]
-        public HistogramUncertainPairedData(double[] xs, ThreadsafeInlineHistogram[] ys, string xlabel, string ylabel, string name, string category)
-        {
-            _xvals = xs;
-            _yvals = ys;
-            _metadata = new CurveMetaData(xlabel, ylabel, name, category);
-            AddRules();
-        }
-        public HistogramUncertainPairedData(double[] xs, ThreadsafeInlineHistogram[] ys, CurveMetaData metadata)
-        {
-            _xvals = xs;
-            _yvals = ys;
-            _metadata = metadata;
-            AddRules();
         }
         #endregion
 
         #region Methods 
-        //TODO: Need to adjust this validation to work with threadsafeInlineHistograms
         private void AddRules()
         {
             switch (_metadata.CurveType)
             {
                 case CurveTypesEnum.StrictlyMonotonicallyIncreasing:
                     AddSinglePropertyRule(nameof(Xvals), new Rule(() => IsArrayValid(Xvals, (a, b) => (a < b)), "X must be strictly monotonically increasing"));
-                    //AddSinglePropertyRule(nameof(Yvals), new Rule(() => IsDistributionArrayValid(Yvals, .9999, (a, b) => (a < b)), "Y must be strictly monotonically increasing"));
-                    //AddSinglePropertyRule(nameof(Yvals), new Rule(() => IsDistributionArrayValid(Yvals, .0001, (a, b) => (a < b)), "Y must be strictly monotonically increasing"));
                     break;
                 case CurveTypesEnum.MonotonicallyIncreasing:
                     AddSinglePropertyRule(nameof(Xvals), new Rule(() => IsArrayValid(Xvals, (a, b) => (a < b)), "X must be strictly monotonically increasing"));
-                    //AddSinglePropertyRule(nameof(Yvals), new Rule(() => IsDistributionArrayValid(Yvals, .9999, (a, b) => (a <= b)), "Y must be weakly monotonically increasing"));
-                    //AddSinglePropertyRule(nameof(Yvals), new Rule(() => IsDistributionArrayValid(Yvals, .0001, (a, b) => (a <= b)), "Y must be weakly monotonically increasing"));
                     break;
                 default:
                     break;
@@ -148,12 +124,12 @@ namespace fda_model.paireddata
             }
             return true;
         }
-        public IPairedData SamplePairedData(double probability)
+        public IPairedData SamplePairedData(double probability, string damageCatagory = null, string assetCatagory = null, int impactArea = -999)
         {
             double[] y = new double[_yvals.Length];
             for (int i = 0; i < _xvals.Length; i++)
             {
-                y[i] = _yvals[i].InverseCDF(probability);
+                y[i] = _yvals[i].ConsequenceExceededWithProbabilityQ(probability);
             }
             PairedData pairedData = new PairedData(_xvals, y, _metadata);//mutability leakage on xvals
             pairedData.Validate();
@@ -183,7 +159,7 @@ namespace fda_model.paireddata
         {
             MessageReport?.Invoke(sender, e);
         }
-        public bool Equals(HistogramUncertainPairedData incomingUncertainPairedData)
+        public bool Equals(ConsequenceResultsUncertainPairedData incomingUncertainPairedData)
         {
             bool nullMatches = CurveMetaData.IsNull.Equals(incomingUncertainPairedData.CurveMetaData.IsNull);
             if (nullMatches && IsNull)
