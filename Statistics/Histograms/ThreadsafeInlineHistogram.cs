@@ -302,6 +302,7 @@ namespace Statistics.Histograms
             //force dequeue is triggered in histogram variance.
             return Math.Sqrt(HistogramVariance());
         }
+        //TODO: do we not need this method? It does nothing but has many references 
         public void SetIterationSize(int iterationSize)
         {
             //_observations = new double[iterationSize];
@@ -384,7 +385,7 @@ namespace Statistics.Histograms
                     double temporaryBinWidth = range / (1.0 + 3.322 * Math.Log10(size));
                     _BinWidth = Math.Min(_BinWidth, temporaryBinWidth);
                 }
-                _BinCounts = new int[] { 0 };
+                _BinCounts = new Int64[] { 0 };
                 _Max = _Min + _BinWidth;
                 _maxQueueCount = _postQueueCount;
 
@@ -411,13 +412,13 @@ namespace Statistics.Histograms
                     _SampleVariance = ((((double)(_SampleSize - 2) / (double)(_SampleSize - 1)) * _SampleVariance) + (Math.Pow(observation - _SampleMean, 2)) / (double)_SampleSize);
                     _SampleMean = tmpMean;
                 }
-                int quantityAdditionalBins = 0;
+                Int64 quantityAdditionalBins = 0;
                 if (observation < _Min)
                 {
-                    quantityAdditionalBins = Convert.ToInt32(Math.Ceiling((_Min - observation) / _BinWidth));
-                    Int32[] newBinCounts = new Int32[quantityAdditionalBins + _BinCounts.Length];
+                    quantityAdditionalBins = Convert.ToInt64(Math.Ceiling((_Min - observation) / _BinWidth));
+                    Int64[] newBinCounts = new Int64[quantityAdditionalBins + _BinCounts.Length];
 
-                    for (int i = _BinCounts.Length + quantityAdditionalBins - 1; i > (quantityAdditionalBins - 1); i--)
+                    for (int i = (int)(_BinCounts.Length + quantityAdditionalBins - 1); i > (quantityAdditionalBins - 1); i--)
                     {
                         newBinCounts[i] = _BinCounts[i - quantityAdditionalBins];
                     }
@@ -430,7 +431,7 @@ namespace Statistics.Histograms
                 else if (observation > _Max)
                 {
                     quantityAdditionalBins = Convert.ToInt32(Math.Ceiling((observation - _Max + _BinWidth) / _BinWidth));
-                    Int32[] newBinCounts = new Int32[quantityAdditionalBins + _BinCounts.Length];
+                    Int64[] newBinCounts = new Int64[quantityAdditionalBins + _BinCounts.Length];
                     for (int i = 0; i < _BinCounts.Length; i++)
                     {
                         newBinCounts[i] = _BinCounts[i];
@@ -450,7 +451,7 @@ namespace Statistics.Histograms
                     if (observation == _Max)
                     {
                         quantityAdditionalBins = 1;
-                        Int32[] newBinCounts = new Int32[quantityAdditionalBins + _BinCounts.Length];
+                        Int64[] newBinCounts = new Int64[quantityAdditionalBins + _BinCounts.Length];
                         for (int i = 0; i < _BinCounts.Length; i++)
                         {
                             newBinCounts[i] = _BinCounts[i];
@@ -473,7 +474,7 @@ namespace Statistics.Histograms
                 AddObservationToHistogram(x,1);
             }
         }
-        public int FindBinCount(double x, bool cumulative = true)
+        public Int64 FindBinCount(double x, bool cumulative = true)
         {
             if(x > Max)
             {
@@ -493,7 +494,7 @@ namespace Statistics.Histograms
             int obsIndex = Convert.ToInt32(Math.Floor((x - _Min) / _BinWidth));
             if (cumulative)
             {
-                int sum = 0;
+                Int64 sum = 0;
                 for (int i = 0; i < obsIndex + 1; i++)
                 {
                     sum += _BinCounts[i];
@@ -575,7 +576,7 @@ namespace Statistics.Histograms
                 {
                     return _Min + (_BinWidth * p);
                 }
-                int numobs = Convert.ToInt32(_SampleSize * p);
+                Int64 numobs = Convert.ToInt64(_SampleSize * p);
                 if (p <= 0.5)
                 {
                     int index = 0;
@@ -734,7 +735,7 @@ namespace Statistics.Histograms
             }
             return _Converged;
         }
-        public int EstimateIterationsRemaining(double upperProbability, double lowerProbability)
+        public Int64 EstimateIterationsRemaining(double upperProbability, double lowerProbability)
         {
             if (_Converged) return 0;
             double upperProb = upperProbability;
@@ -742,34 +743,48 @@ namespace Statistics.Histograms
             double zAlphaDoubled = 2 * _ConvergenceCriteria.ZAlpha;
             double upperValueAtUpperProb = InverseCDF(upperProb);
             double probOfUpperValue = PDF(upperValueAtUpperProb);
-            int upperEstimateIterationsRemaining = _ConvergenceCriteria.MaxIterations;
+            Int64 upperEstimateIterationsRemaining = _ConvergenceCriteria.MaxIterations;
             if (probOfUpperValue > 0.0 & upperValueAtUpperProb !=0 )
             {
                 double bottomTerm = upperValueAtUpperProb * _ConvergenceCriteria.Tolerance * probOfUpperValue;
                 double anotherTerm = (zAlphaDoubled / (bottomTerm));
                 double anotherTermSquared = Math.Pow(anotherTerm, 2.0);
                 double productTerm = valueOfSomethingNotClear * anotherTermSquared;
-                int productTermToInt = (int)Math.Ceiling(productTerm);
-                upperEstimateIterationsRemaining = Math.Abs(productTermToInt);
+                if(productTerm > Int64.MaxValue)
+                {
+                    upperEstimateIterationsRemaining = Int64.MaxValue;
+                }
+                else
+                {
+                    int productTermToInt = (int)Math.Ceiling(productTerm);
+                    upperEstimateIterationsRemaining = Math.Abs(productTermToInt);
+                }
             }
             double lowerProb = lowerProbability;
             double lowerValueOfSomethingNotClear = lowerProb * (1 - lowerProb);
             double lowerZAlphaDoubled = 2 * _ConvergenceCriteria.ZAlpha; //this need not be negative?
             double lowerValueAtLowerProb = InverseCDF(lowerProb);
             double probOfLowerValue = PDF(lowerValueAtLowerProb);
-            int lowerEstimateIterationsRemaining = _ConvergenceCriteria.MaxIterations;
+            Int64 lowerEstimateIterationsRemaining = _ConvergenceCriteria.MaxIterations;
             if (probOfLowerValue > 0.0 & upperValueAtUpperProb != 0)
             {
                 double bottomTerm = lowerValueAtLowerProb * _ConvergenceCriteria.Tolerance * probOfLowerValue;
                 double anotherTerm = (lowerZAlphaDoubled / (bottomTerm));
                 double anotherTermSquared = Math.Pow(anotherTerm, 2.0);
-                double productTerm = valueOfSomethingNotClear * anotherTermSquared;
-                int productTermToInt = (int)Math.Ceiling(productTerm);
-                lowerEstimateIterationsRemaining = Math.Abs(productTermToInt);
+                double productTerm = lowerValueOfSomethingNotClear * anotherTermSquared;
+                if(productTerm > Int64.MaxValue)
+                {
+                    lowerEstimateIterationsRemaining = Int64.MaxValue;
+                }
+                else
+                {
+                    int productTermToInt = (int)Math.Ceiling(productTerm);
+                    lowerEstimateIterationsRemaining = Math.Abs(productTermToInt);
+                }
             }
-            int biggestGuessIterationsRemaining = Math.Max(upperEstimateIterationsRemaining, lowerEstimateIterationsRemaining);
-            int remainingIterations = _ConvergenceCriteria.MaxIterations - _SampleSize;
-            return Convert.ToInt32(Math.Min(remainingIterations, biggestGuessIterationsRemaining));
+            Int64 biggestGuessIterationsRemaining = Math.Max(upperEstimateIterationsRemaining, lowerEstimateIterationsRemaining);
+            Int64 remainingIterations = _ConvergenceCriteria.MaxIterations - _SampleSize;
+            return Convert.ToInt64(Math.Min(remainingIterations, biggestGuessIterationsRemaining));
         }
         public bool Equals(IHistogram histogramToCompare)
         {
