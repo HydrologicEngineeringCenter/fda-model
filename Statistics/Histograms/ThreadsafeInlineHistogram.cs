@@ -10,17 +10,17 @@ namespace Statistics.Histograms
     {
         #region Fields
         private bool _HistogramIsZeroValued = false;
-        private Int32[] _BinCounts = new Int32[] { };
+        private Int64[] _BinCounts = new Int64[] { };
         private double _SampleMean;
         private double _SampleVariance;
         private double _Min;
         private double _Max;
         private double _SampleMin;
         private double _SampleMax;
-        private int _SampleSize;
+        private Int64 _SampleSize;
         private double _BinWidth;
         private bool _Converged = false;
-        private int _ConvergedIterations = int.MinValue;
+        private Int64 _ConvergedIterations = int.MinValue;
         private bool _ConvergedOnMax = false;
         private ConvergenceCriteria _ConvergenceCriteria;
         private int _maxQueueCount = 1000; //TODO: what does this represent?
@@ -61,7 +61,7 @@ namespace Statistics.Histograms
                 return _Converged;
             }
         }
-        public int ConvergedIteration
+        public Int64 ConvergedIteration
         {
             get
             {
@@ -91,7 +91,7 @@ namespace Statistics.Histograms
                 return _BinWidth;
             }
         }
-        public Int32[] BinCounts
+        public Int64[] BinCounts
         {
             get
             {
@@ -151,7 +151,7 @@ namespace Statistics.Histograms
                 return Math.Pow(Variance, 0.5);
             }
         }
-        public int SampleSize
+        public Int64 SampleSize
         {
             get
             {
@@ -195,7 +195,7 @@ namespace Statistics.Histograms
             _maxQueueCount = startqueueSize;
             _postQueueCount = postqueueSize;
         }
-        private ThreadsafeInlineHistogram(double min, double max, double binWidth, Int32[] binCounts, ConvergenceCriteria convergenceCriteria)
+        private ThreadsafeInlineHistogram(double min, double max, double binWidth, Int64[] binCounts, ConvergenceCriteria convergenceCriteria)
         {
             _observations = new System.Collections.Concurrent.ConcurrentQueue<double>();
             Min = min;

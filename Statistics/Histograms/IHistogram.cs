@@ -8,15 +8,15 @@ namespace Statistics.Histograms
         #region Properties 
         bool IsConverged { get; }
         bool HistogramIsZeroValued { get; set; }
-        int ConvergedIteration { get; }
+        Int64 ConvergedIteration { get; }
         double BinWidth { get; }
-        Int32[] BinCounts { get; }
+        Int64[] BinCounts { get; }
         double Min { get;  }
         double Max { get;  }
         double Mean { get; }
         double Variance { get; }
         double StandardDeviation { get; }
-        int SampleSize { get; }
+        Int64 SampleSize { get; }
         ConvergenceCriteria ConvergenceCriteria { get; }
         string MyType { get; }
 
