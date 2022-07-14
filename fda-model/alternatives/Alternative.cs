@@ -148,14 +148,14 @@ namespace alternatives
                     double aaeqDamage = ComputeEEAD(eadSampledBaseYear, baseYear, eadSampledFutureYear, futureYear, periodOfAnalysis, discountRate);
                     aaeqResult.AddConsequenceRealization(aaeqDamage, i);
                     Interlocked.Increment(ref _completedIterations);
-                    if (!aaeqResult.ConsequenceHistogram.IsHistogramConverged(.95,.05))
-                    {
-                        iterations = aaeqResult.ConsequenceHistogram.EstimateIterationsRemaining(.95, .05);
-                        _ExpectedIterations = _completedIterations + iterations;
-                        progressChunks = _ExpectedIterations / 100;
-                    }
                 }
                 );
+                if (!aaeqResult.ConsequenceHistogram.IsHistogramConverged(.95, .05))
+                {
+                    iterations = aaeqResult.ConsequenceHistogram.EstimateIterationsRemaining(.95, .05);
+                    _ExpectedIterations = _completedIterations + iterations;
+                    progressChunks = _ExpectedIterations / 100;
+                }
             }
             aaeqResult.ConsequenceHistogram.ForceDeQueue();
             return aaeqResult;
