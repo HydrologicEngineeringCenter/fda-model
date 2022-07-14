@@ -303,12 +303,12 @@ namespace Statistics.Histograms
             return Math.Sqrt(HistogramVariance());
         }
         //TODO: do we not need this method? It does nothing but has many references 
-        public void SetIterationSize(int iterationSize)
+        public void SetIterationSize(Int64 iterationSize)
         {
             //_observations = new double[iterationSize];
             //_maxQueueCount = iterationSize;
         }
-        public void AddObservationToHistogram(double observation, int index)
+        public void AddObservationToHistogram(double observation, Int64 index)
         {
             _observations.Enqueue(observation);
             Interlocked.Increment(ref _enqueue);
@@ -668,10 +668,10 @@ namespace Statistics.Histograms
             int sampleSize = Convert.ToInt32(sampleSizeString);
             string binQuantityString = element.Attribute("Bin_Quantity").Value;
             int binQuantity = Convert.ToInt32(binQuantityString);
-            Int32[] binCounts = new Int32[binQuantity];
+            Int64[] binCounts = new Int64[binQuantity];
             for (int i = 0; i < binQuantity; i++)
             {
-                binCounts[i] = Convert.ToInt32(element.Attribute($"Bin_Counts_{i}").Value);
+                binCounts[i] = Convert.ToInt64(element.Attribute($"Bin_Counts_{i}").Value);
             }
             ConvergenceCriteria convergenceCriteria = ConvergenceCriteria.ReadFromXML(element.Element("Convergence_Criteria"));
             string sampleMeanString = element.Attribute("Sample_Mean").Value;

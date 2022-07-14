@@ -288,7 +288,7 @@ namespace Statistics.Histograms
         /// </summary>
         /// <param name="observation"></param>
         /// <param name="index"></param>
-        public void AddObservationToHistogram(double observation, int index = 0) //TODO index is a hack
+        public void AddObservationToHistogram(double observation, Int64 index = 0) //TODO index is a hack
         {   
             if (_SampleSize == 0){
                 _SampleMax = observation;
@@ -549,7 +549,7 @@ namespace Statistics.Histograms
                 {
                     double probabilityStep = (i + 0.5) / binQuantity; //binQuantity determines the number of probability steps ... this may be too small
                     double summedValue = 0;
-                    int summedBinCount = 0;
+                    Int64 summedBinCount = 0;
 
                     foreach (IHistogram histogramToSample in histograms)
                     {

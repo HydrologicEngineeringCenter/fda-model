@@ -27,13 +27,13 @@ namespace Statistics.Histograms
         double PDF(double x);
         double CDF(double x);
         double InverseCDF(double p);
-        void AddObservationToHistogram(double observation, int iterationIndex);
+        void AddObservationToHistogram(double observation, Int64 iterationIndex);
         void ForceDeQueue();
         XElement WriteToXML();
         bool IsHistogramConverged(double upperq, double lowerq);
-        int EstimateIterationsRemaining(double upperq, double lowerq);
+        Int64 EstimateIterationsRemaining(double upperq, double lowerq);
         bool Equals(IHistogram histogramForComparison);
-        int FindBinCount(double x, bool cumulative = true);
+        Int64 FindBinCount(double x, bool cumulative = true);
         #endregion
     }
 }
