@@ -850,6 +850,7 @@ namespace compute
         }
         private bool CurvesOverlap(double maxOfF, double minOfF, double maxOfG, double minOfG)
         {
+            double overlapThreshold = 0.20;
             bool curvesOverlap = true;
 
             double rangeOfF = maxOfF - minOfF;
@@ -861,7 +862,7 @@ namespace compute
             double maxDiffRelativeToF = maxDifference / rangeOfF;
             double maxDiffRelativeToG = maxDifference / rangeOfG;
 
-            if (minDiffRelativeToF > .5 || minDiffRelativeToG > .5 || maxDiffRelativeToF > .5 || maxDiffRelativeToG > .5)
+            if (minDiffRelativeToF > overlapThreshold || minDiffRelativeToG > overlapThreshold || maxDiffRelativeToF > overlapThreshold || maxDiffRelativeToG > overlapThreshold)
             {
                 curvesOverlap = false;
             }
