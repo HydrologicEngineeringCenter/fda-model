@@ -144,8 +144,17 @@ namespace alternatives
             {
                 Parallel.For(0, iterations, i =>
                 {
-                    double eadSampledBaseYear = baseYearDamageResult.ConsequenceHistogram.InverseCDF(randomProvider.NextRandom());
-                    double eadSampledFutureYear = mlfYearDamageResult.ConsequenceHistogram.InverseCDF(randomProvider.NextRandom());
+                    interfaces.IProvideRandomNumbers threadlocalRandomProvider;
+                    if (randomProvider is MeanRandomProvider)
+                    {
+                        threadlocalRandomProvider = new MeanRandomProvider();
+                    }
+                    else
+                    {
+                        threadlocalRandomProvider = new RandomProvider(seeds[i]);
+                    }
+                    double eadSampledBaseYear = baseYearDamageResult.ConsequenceHistogram.InverseCDF(threadlocalRandomProvider.NextRandom());
+                    double eadSampledFutureYear = mlfYearDamageResult.ConsequenceHistogram.InverseCDF(threadlocalRandomProvider.NextRandom());
                     double aaeqDamage = ComputeEEAD(eadSampledBaseYear, baseYear, eadSampledFutureYear, futureYear, periodOfAnalysis, discountRate);
                     aaeqResult.AddConsequenceRealization(aaeqDamage, i);
                     Interlocked.Increment(ref _completedIterations);
