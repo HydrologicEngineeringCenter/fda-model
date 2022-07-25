@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using Geospatial.GDALAssist;
+using structures;
 
 namespace fda_model_test_unittests
 {
