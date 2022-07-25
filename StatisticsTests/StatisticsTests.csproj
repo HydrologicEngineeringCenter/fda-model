@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -21,6 +21,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Statistics\Statistics.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Utilities">
+      <HintPath>..\..\fda-utilities\Build\FDA2.0\Utilities.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

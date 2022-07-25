@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	 <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	  <OutputPath>..\Build\FDA2.0</OutputPath>
   </PropertyGroup>
@@ -17,7 +17,12 @@
 
   <ItemGroup>
 	<PackageReference Include="HEC.MVVMFramework.Model" Version="1.0.0-alpha-2022.2.15.2147" />
-	<PackageReference Include="USACE.HEC.FDA.Utilities" Version="1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Utilities">
+      <HintPath>..\..\fda-utilities\Build\FDA2.0\Utilities.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
