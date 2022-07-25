@@ -29,17 +29,17 @@ namespace metrics
             }
         }
         #region Constructors 
-        public ImpactAreaScenarioResults(int impactAreaID, bool isNull)
+        public ImpactAreaScenarioResults()
         {
-            PerformanceByThresholds = new PerformanceByThresholds(true);
+            PerformanceByThresholds = new PerformanceByThresholds();
             ConsequenceResults = new ConsequenceDistributionResults();
-            ImpactAreaID = impactAreaID;
-            _isNull = isNull;
+            ImpactAreaID = 0;
+            _isNull = true;
         }
         public ImpactAreaScenarioResults(int impactAreaID)
         {
             PerformanceByThresholds = new PerformanceByThresholds();
-            ConsequenceResults = new ConsequenceDistributionResults(false);
+            ConsequenceResults = new ConsequenceDistributionResults();
             ImpactAreaID = impactAreaID;
             _isNull = false;
         }
@@ -128,12 +128,9 @@ namespace metrics
             {   
                 foreach (ConsequenceDistributionResult consequenceDistributionResult in ConsequenceResults.ConsequenceResultList)
                 {
-                    if(!consequenceDistributionResult.ConsequenceHistogram.HistogramIsZeroValued)
+                    if(consequenceDistributionResult.ConsequenceHistogram.IsConverged == false)
                     {
-                        if(consequenceDistributionResult.ConsequenceHistogram.IsConverged == false)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
             }
@@ -171,16 +168,10 @@ namespace metrics
                 if (computeWithDamage == true)
                 {
                     foreach (ConsequenceDistributionResult consequenceDistributionResult in ConsequenceResults.ConsequenceResultList)
-                    {   
-                        if(consequenceDistributionResult.ConsequenceHistogram.HistogramIsZeroValued)
+                    {
+                        if (consequenceDistributionResult.ConsequenceHistogram.IsHistogramConverged(upperConfidenceLimitProb, lowerConfidenceLimitProb) == false)
                         {
-                            eadIsConverged = true;
-                        } else
-                        {
-                            if (consequenceDistributionResult.ConsequenceHistogram.IsHistogramConverged(upperConfidenceLimitProb, lowerConfidenceLimitProb) == false)
-                            {
-                                eadIsConverged = false;
-                            }
+                            eadIsConverged = false;
                         }
                     }
                 }
@@ -207,25 +198,18 @@ namespace metrics
             }
             return eadIsConverged && cnepIsConverged;
         }
-        public Int64 RemainingIterations(double upperConfidenceLimitProb, double lowerConfidenceLimitProb, bool computeWithDamage)
+        public int RemainingIterations(double upperConfidenceLimitProb, double lowerConfidenceLimitProb, bool computeWithDamage)
         {
-            List<Int64> eadIterationsRemaining = new List<Int64>();
+            List<int> eadIterationsRemaining = new List<int>();
             if (computeWithDamage == true)
             {
                 foreach (ConsequenceDistributionResult consequenceDistributionResult in ConsequenceResults.ConsequenceResultList)
                 {
-                    if (consequenceDistributionResult.ConsequenceHistogram.HistogramIsZeroValued)
-                    {
-                        eadIterationsRemaining.Add(0);
-                    }
-                    else
-                    {
                     eadIterationsRemaining.Add(consequenceDistributionResult.ConsequenceHistogram.EstimateIterationsRemaining(upperConfidenceLimitProb, lowerConfidenceLimitProb));
-                    }
                 }
             }
 
-            List<Int64> performanceIterationsRemaining = new List<Int64>();
+            List<int> performanceIterationsRemaining = new List<int>();
             foreach (var threshold in PerformanceByThresholds.ListOfThresholds)
             {
                 performanceIterationsRemaining.Add(threshold.SystemPerformanceResults.AssuranceRemainingIterations(upperConfidenceLimitProb, lowerConfidenceLimitProb));
@@ -262,7 +246,7 @@ namespace metrics
             return masterElement;
         }
 
-        public static ImpactAreaScenarioResults ReadFromXML(XElement xElement)
+        public static IContainImpactAreaScenarioResults ReadFromXML(XElement xElement)
         {
             PerformanceByThresholds performanceByThresholds = PerformanceByThresholds.ReadFromXML(xElement.Element("Performance_By_Thresholds"));
             ConsequenceDistributionResults expectedAnnualDamageResults = ConsequenceDistributionResults.ReadFromXML(xElement.Element("Expected_Annual_Damage_Results"));

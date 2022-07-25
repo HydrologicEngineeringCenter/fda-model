@@ -35,7 +35,7 @@ namespace metrics
             ThresholdType = ThresholdEnum.ExteriorStage;
             ThresholdID = 9999;
             ConvergenceCriteria convergenceCriteria = new ConvergenceCriteria();
-            SystemPerformanceResults = new SystemPerformanceResults();
+            SystemPerformanceResults = new SystemPerformanceResults(ThresholdType, ThresholdID, convergenceCriteria);
             _isNull = true;
         }
         public Threshold(int thresholdID,ConvergenceCriteria c, ThresholdEnum thresholdType=0, double thresholdValue=0 )

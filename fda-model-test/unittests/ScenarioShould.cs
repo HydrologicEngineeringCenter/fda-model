@@ -11,7 +11,6 @@ using compute;
 using metrics;
 using scenarios;
 using System.Xml.Linq;
-using Statistics.Histograms;
 
 namespace fda_model_test.unittests
 {
@@ -33,7 +32,7 @@ namespace fda_model_test.unittests
         public void ScenarioShouldReadWhatItWrites()
         {
             ConvergenceCriteria convergenceCriteria = new ConvergenceCriteria(minIterations: 1, maxIterations: 1);
-            ContinuousDistribution flow_frequency = new LogPearson3(1, 2, 3, 100);
+            ContinuousDistribution flow_frequency = new LogPearson3(1,2,3,100);
             //create a stage distribution
             IDistribution[] stages = new IDistribution[2];
             for (int i = 0; i < 2; i++)
@@ -52,7 +51,7 @@ namespace fda_model_test.unittests
             upd.Add(stage_damage);
 
             Threshold threshold = new Threshold(1, convergenceCriteria, metrics.ThresholdEnum.ExteriorStage, 150000);//do we want to access this through _results?
-
+            
             // build IAS for Impact Area 1
             ImpactAreaScenarioSimulation simulation1 = ImpactAreaScenarioSimulation.builder(id1)
                 .withFlowFrequency(flow_frequency)
@@ -129,7 +128,5 @@ namespace fda_model_test.unittests
             bool scenariosAreEqual = scenarioResults.Equals(scenarioResultsFromXML);
             Assert.True(scenariosAreEqual);
         }
-
     }
 }
-

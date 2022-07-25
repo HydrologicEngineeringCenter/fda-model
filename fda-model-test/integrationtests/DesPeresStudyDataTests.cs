@@ -56,6 +56,7 @@ namespace fda_model_test.integrationtests
 
         static List<UncertainPairedData> stageDamageList = new List<UncertainPairedData>();
         static int seed = 1234;
+        static int baseYear = 1990;
         static RandomProvider randomProvider = new RandomProvider(seed);
         [Fact]
         public void ComputeShould()
@@ -65,10 +66,10 @@ namespace fda_model_test.integrationtests
                 .withFrequencyStage(graphicalUncertain)
                 .withStageDamages(stageDamageList)
                 .build();
+            List<ImpactAreaScenarioSimulation> impactAreaScenarioSimulations = new List<ImpactAreaScenarioSimulation>();
 
             ImpactAreaScenarioResults impactAreaScenarioResults = simulation.Compute(randomProvider, new ConvergenceCriteria());
-
-            Assert.True(impactAreaScenarioResults.ConsequenceResults.GetConsequenceResultsHistogram("res", "struct", impactAreaID).HistogramIsZeroValued);
+            Assert.True(impactAreaScenarioResults.ConsequenceResults.IsNull);
 
         }
     }

@@ -25,12 +25,6 @@ namespace utilities
         private int _NRows;
         private int _NColumns;
 
-        public int NumberOfRows
-        {
-            get { return _NRows; }
-        }
-
-
         public dbfreader(string filepath)
         {
             if (Path.GetExtension(filepath).ToLower() != ".dbf")
@@ -53,40 +47,52 @@ namespace utilities
             _dbfreader.Close(); _dbfreader.Dispose();
             _dbfstream.Close(); _dbfstream.Dispose();
         }
-
         private object ConvertCellValueToProperType(string CellValue, Type ColumnType)
         {
-            switch (ColumnType.GetTypeInfo().Name.ToUpper())
+            switch (ColumnType.GetTypeInfo().Name)
             {
-                case "INT32":
+                case "Int32":
                     {
-                        int.TryParse(CellValue, out int i);
+                        Int32 i;
+                        int.TryParse(CellValue, out i);
                         return i;
                     }
 
-                case "DOUBLE":
+                case "double":
                     {
-                        double.TryParse(CellValue, out double i);
+                        double i;
+                        double.TryParse(CellValue, out i);
                         return i;
                     }
-                case "STRING":
+                case "Double":
+                    {
+                        double i;
+                        double.TryParse(CellValue, out i);
+                        return i;
+                    }
+                case "string":
                     {
                         return CellValue.Trim(System.Convert.ToChar(" "));
                     }
-                case "BOOL":
+
+                case "bool":
                     {
-                        switch (CellValue.ToUpper())
+                        switch (CellValue)
                         {
                             case "0":
                             case "F":
+                            case "f":
                             case "N":
+                            case "n":
                                 {
                                     return false;
                                 }
 
                             case "1":
                             case "T":
+                            case "t":
                             case "Y":
+                            case "y":
                                 {
                                     return true;
                                 }
@@ -96,10 +102,14 @@ namespace utilities
                                     return false;
                                 }
                         }
+
+                        break;
                     }
+
                 default:
                     {
-                        throw new Exception("Column Type " + ColumnType.GetTypeInfo().Name + " not supported");
+                        throw new Exception("Column Type not supported");
+                        return null;
                     }
             }
         }

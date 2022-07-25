@@ -30,14 +30,6 @@ namespace metrics
         #endregion
 
         #region Constructor
-        internal ScenarioResults()
-        {
-            _resultsList = new List<IContainImpactAreaScenarioResults>();
-            int dummyImpactAreaID = 0;
-            ImpactAreaScenarioResults dummyImpactAreaScenarioResults = new ImpactAreaScenarioResults(dummyImpactAreaID,true);
-            _resultsList.Add(dummyImpactAreaScenarioResults);
-            AnalysisYear = 1900;
-        }
         public ScenarioResults(int year)
         {
             _resultsList = new List<IContainImpactAreaScenarioResults>();
@@ -384,8 +376,7 @@ namespace metrics
                     return results;
                 }
             }
-            int dummyImpactAreaID = 9999;
-            ImpactAreaScenarioResults dummyResults = new ImpactAreaScenarioResults(dummyImpactAreaID,true);
+            ImpactAreaScenarioResults dummyResults = new ImpactAreaScenarioResults();
             string message = $"The IMPACT AREA SCENARIO RESULTS could not be found. an arbitrary object is being returned";
             HEC.MVVMFramework.Model.Messaging.ErrorMessage errorMessage = new HEC.MVVMFramework.Model.Messaging.ErrorMessage(message, HEC.MVVMFramework.Base.Enumerations.ErrorLevel.Fatal);
             ReportMessage(this, new MessageEventArgs(errorMessage));
