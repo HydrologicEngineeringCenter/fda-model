@@ -54,7 +54,7 @@ namespace structures
         /// Constructor to create a SI from a shapefile. Gonna need to do this from database potentially as well
         /// </summary>
         /// <param name="pointShapefilePath"></param>
-        public Inventory(string pointShapefilePath, string impactAreaShapefilePath)
+        public Inventory(string pointShapefilePath, string impactAreaShapefilePath = "")
         {
             PointFeatureLayer structureInventory = new PointFeatureLayer("Structure_Inventory", pointShapefilePath);
             PointMs pointMs = new PointMs(structureInventory.Points().Select(p => p.PointM()));
@@ -73,8 +73,8 @@ namespace structures
                 string st_damcat = (string)row["st_damcat"];
                 string occtype = (string)row["occtype"];
                 string cbfips = (string)row["cbfips"];
-                int impactAreaID = GetImpactAreaID(point, impactAreaShapefilePath);
-                _structures.Add(new Structure(fid, point, found_ht, val_struct, val_cont, val_vehic, val_other, st_damcat, occtype, impactAreaID, cbfips));
+                //int impactAreaID = GetImpactAreaID(point, impactAreaShapefilePath);
+                _structures.Add(new Structure(fid, point, found_ht, val_struct, val_cont, val_vehic, val_other, st_damcat, occtype, 1, cbfips));
             }
         }
         // Will need a constructor/load from Database ; 
