@@ -74,7 +74,7 @@ namespace metrics
             _assetCategory = "unassigned";
             _regionID = 0;
             _convergenceCriteria = new ConvergenceCriteria();
-            _consequenceHistogram = new ThreadsafeInlineHistogram(_convergenceCriteria);
+            _consequenceHistogram = new ThreadsafeInlineHistogram();
             _isNull = true;
         }
         /// <summary>
@@ -87,18 +87,6 @@ namespace metrics
             _regionID = impactAreaID;
             _convergenceCriteria = convergenceCriteria;
             _consequenceHistogram = new ThreadsafeInlineHistogram(_convergenceCriteria);
-            _isNull = false;
-        }
-        /// <summary>
-        /// This constructor builds a ThreadsafeInlineHistogram. Only use for parallel computes. 
-        /// </summary>
-        public ConsequenceDistributionResult(string damageCategory, string assetCategory, ConvergenceCriteria convergenceCriteria, int impactAreaID, double binWidth)
-        {
-            _damageCategory = damageCategory;
-            _assetCategory = assetCategory;
-            _regionID = impactAreaID;
-            _convergenceCriteria = convergenceCriteria;
-            _consequenceHistogram = new ThreadsafeInlineHistogram(binWidth, _convergenceCriteria);
             _isNull = false;
         }
         /// <summary>
@@ -122,7 +110,7 @@ namespace metrics
         #endregion
 
         #region Methods
-        internal void AddConsequenceRealization(double damageRealization, int iteration)
+        internal void AddConsequenceRealization(double damageRealization, Int64 iteration)
         {
             _consequenceHistogram.AddObservationToHistogram(damageRealization, iteration);
         }

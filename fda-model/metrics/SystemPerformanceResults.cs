@@ -14,13 +14,13 @@ using HEC.MVVMFramework.Base.Enumerations;
 
 namespace metrics
 {
-    public class SystemPerformanceResults : HEC.MVVMFramework.Base.Implementations.Validation, IReportMessage
+    public class SystemPerformanceResults : Validation, IReportMessage
     {
         #region Fields
-        private const double AEP_HISTOGRAM_DEFAULT_BINWIDTH = .001;
-        private const double CNEP_HISTOGRAM_DEFAULT_BINWIDTH = .5;
         private const string AEP_ASSURANCE_TYPE = "AEP";
+        private const string AEP_ASSURANCE_FOR_PLOTTING = "AEP_PLOT";
         private const string STAGE_ASSURANCE_TYPE = "STAGE";
+        private const double AEP_BIN_WIDTH = 0.002;
         private bool _calculatePerformanceForLevee;
         //TODO: handle performance by different threshold types 
         private ThresholdEnum _thresholdType;
@@ -41,15 +41,35 @@ namespace metrics
         public event MessageReportedEventHandler MessageReport;
         #endregion
         #region Constructors 
+        ///
+        public SystemPerformanceResults()
+        {
+            _thresholdType = ThresholdEnum.ExteriorStage;
+            _thresholdValue = 0;
+            _ConvergenceCriteria = new ConvergenceCriteria();
+            _assuranceList = new List<AssuranceResultStorage>();
+            AssuranceResultStorage dummyAEP = new AssuranceResultStorage(AEP_ASSURANCE_TYPE,0);
+            AssuranceResultStorage dummyPlottingAEP = new AssuranceResultStorage(AEP_ASSURANCE_FOR_PLOTTING, 0);
+            _assuranceList.Add(dummyAEP);
+            _assuranceList.Add(dummyPlottingAEP);
+            double[] standardNonExceedanceProbabilities = new double[] { .9, .96, .98, .99, .996, .998 };
+             foreach (double probability in standardNonExceedanceProbabilities)
+            {
+                AssuranceResultStorage dummyAssurance = new AssuranceResultStorage(STAGE_ASSURANCE_TYPE, probability);
+                _assuranceList.Add(dummyAssurance);
+            }
+
+        }
         public SystemPerformanceResults(ThresholdEnum thresholdType, double thresholdValue, ConvergenceCriteria convergenceCriteria)
         {
             _thresholdType = thresholdType;
             _thresholdValue = thresholdValue;
             _ConvergenceCriteria = convergenceCriteria;
             _assuranceList = new List<AssuranceResultStorage>();
-            AssuranceResultStorage aepAssurance = new AssuranceResultStorage(AEP_ASSURANCE_TYPE, convergenceCriteria, AEP_HISTOGRAM_DEFAULT_BINWIDTH);
+            AssuranceResultStorage aepAssurance = new AssuranceResultStorage(AEP_ASSURANCE_TYPE, AEP_BIN_WIDTH, convergenceCriteria);
             _assuranceList.Add(aepAssurance);
-
+            AssuranceResultStorage aepAssuranceForPlotting = new AssuranceResultStorage(AEP_ASSURANCE_FOR_PLOTTING, convergenceCriteria);
+            _assuranceList.Add(aepAssuranceForPlotting);
         }
         public SystemPerformanceResults(ThresholdEnum thresholdType, double thresholdValue, UncertainPairedData systemResponseFunction, ConvergenceCriteria  convergenceCriteria)
         {
@@ -58,8 +78,10 @@ namespace metrics
             _thresholdType = thresholdType;
             _thresholdValue = thresholdValue;
             _assuranceList = new List<AssuranceResultStorage>();
-            AssuranceResultStorage aepAssurance = new AssuranceResultStorage(AEP_ASSURANCE_TYPE, convergenceCriteria, AEP_HISTOGRAM_DEFAULT_BINWIDTH);
+            AssuranceResultStorage aepAssurance = new AssuranceResultStorage(AEP_ASSURANCE_TYPE, AEP_BIN_WIDTH, convergenceCriteria);
             _assuranceList.Add(aepAssurance);
+            AssuranceResultStorage aepAssuranceForPlotting = new AssuranceResultStorage(AEP_ASSURANCE_FOR_PLOTTING, convergenceCriteria);
+            _assuranceList.Add(aepAssuranceForPlotting);
             _ConvergenceCriteria = convergenceCriteria;
 
         }
@@ -85,9 +107,13 @@ namespace metrics
 
         #endregion
         #region Methods
+        /// <summary>
+        /// The standard non-exceedance probabilities are one of the double[] { .9, .96, .98, .99, .996, .998 };
+        /// </summary>
+        /// <param name="standardNonExceedanceProbability"></param>
         public void AddAssuranceHistogram(double standardNonExceedanceProbability)
-        {
-            AssuranceResultStorage assurance = new AssuranceResultStorage(STAGE_ASSURANCE_TYPE, _ConvergenceCriteria, CNEP_HISTOGRAM_DEFAULT_BINWIDTH, standardNonExceedanceProbability);
+        {   
+            AssuranceResultStorage assurance = new AssuranceResultStorage(STAGE_ASSURANCE_TYPE, _ConvergenceCriteria, standardNonExceedanceProbability);
             if (!_assuranceList.Contains(assurance))
             {
                 _assuranceList.Add(assurance);
@@ -95,9 +121,15 @@ namespace metrics
         }
         /// <summary>
         /// This method returns the thread safe inline histogram of AEPs
+        /// This method is only used to get the histogram for plotting purposes. 
         /// </summary>
         /// <returns></returns>
         public ThreadsafeInlineHistogram GetAEPHistogram()
+        {
+            ThreadsafeInlineHistogram aepHistogram = GetAssurance(AEP_ASSURANCE_FOR_PLOTTING).AssuranceHistogram;
+            return aepHistogram;
+        }
+        private ThreadsafeInlineHistogram GetAEPHistogramForMetrics()
         {
             ThreadsafeInlineHistogram aepHistogram = GetAssurance(AEP_ASSURANCE_TYPE).AssuranceHistogram;
             return aepHistogram;
@@ -106,11 +138,12 @@ namespace metrics
         {
             MessageReport?.Invoke(sender, e);
         }
-        public void AddAEPForAssurance(double aep, int iteration)
+        public void AddAEPForAssurance(double aep, Int64 iteration)
         {
             GetAssurance(AEP_ASSURANCE_TYPE).AssuranceHistogram.AddObservationToHistogram(aep, iteration);
+            GetAssurance(AEP_ASSURANCE_FOR_PLOTTING).AssuranceHistogram.AddObservationToHistogram(aep, iteration);
         }
-        public void AddStageForAssurance(double standardNonExceedanceProbability, double stage, int iteration)
+        public void AddStageForAssurance(double standardNonExceedanceProbability, double stage, Int64 iteration)
         {
             GetAssurance(STAGE_ASSURANCE_TYPE, standardNonExceedanceProbability).AssuranceHistogram.AddObservationToHistogram(stage, iteration);
         }
@@ -127,9 +160,7 @@ namespace metrics
 
         public double AssuranceOfAEP(double exceedanceProbability)
         {   //assurance of AEP is a non-exceedance probability so we use CDF as is 
-            IHistogram aepHistogram = GetAEPHistogram();
-            double assuranceOfAEP = aepHistogram.CDF(exceedanceProbability);
-            //double assuranceOfAEP = GetAssurance(AEP_ASSURANCE_TYPE).AssuranceHistogram.CDF(exceedanceProbability);
+            double assuranceOfAEP = GetAssurance(AEP_ASSURANCE_TYPE).AssuranceHistogram.CDF(exceedanceProbability);
             return assuranceOfAEP;
         }
         public bool AssuranceIsConverged()
@@ -145,11 +176,11 @@ namespace metrics
             bool assuranceIsConverged = assuranceHistogram.IsHistogramConverged(upperConfidenceLimitProb, lowerConfidenceLimitProb);
             return assuranceIsConverged;
         }
-        public int AssuranceRemainingIterations(double upperConfidenceLimitProb, double lowerConfidenceLimitProb)
+        public Int64 AssuranceRemainingIterations(double upperConfidenceLimitProb, double lowerConfidenceLimitProb)
         {
             double standardNonExceedanceProbability = 0.98;
             ThreadsafeInlineHistogram assuranceHistogram = GetAssurance(STAGE_ASSURANCE_TYPE, standardNonExceedanceProbability).AssuranceHistogram;
-            int iterationsRemaining = assuranceHistogram.EstimateIterationsRemaining(upperConfidenceLimitProb, lowerConfidenceLimitProb);
+            Int64 iterationsRemaining = assuranceHistogram.EstimateIterationsRemaining(upperConfidenceLimitProb, lowerConfidenceLimitProb);
             return iterationsRemaining;
         }
         public double AssuranceOfEvent(double standardNonExceedanceProbability)
@@ -256,7 +287,7 @@ namespace metrics
             string message = $"The requested type and standardNonExceedanceProbability were not found. a dummy assurance object is being returned";
             HEC.MVVMFramework.Model.Messaging.ErrorMessage errorMessage = new HEC.MVVMFramework.Model.Messaging.ErrorMessage(message, HEC.MVVMFramework.Base.Enumerations.ErrorLevel.Fatal);
             ReportMessage(this, new MessageEventArgs(errorMessage));
-            AssuranceResultStorage dummyAssurance = new AssuranceResultStorage();
+            AssuranceResultStorage dummyAssurance = new AssuranceResultStorage(STAGE_ASSURANCE_TYPE,.98);
             return dummyAssurance;
 
         }

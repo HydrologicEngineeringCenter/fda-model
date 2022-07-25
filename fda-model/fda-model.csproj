@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
 	<OutputPath>..\Build\FDA2.0</OutputPath>
   </PropertyGroup>
 
@@ -16,22 +16,14 @@
 
 	
   <ItemGroup>
-    <PackageReference Include="HEC.MVVMFramework.Model" Version="1.0.0-alpha-2022.2.15.2147" />
+    <PackageReference Include="HEC.MVVMFramework.Model" Version="1.0.0-alpha-2022.7.8.2331" />
+	<PackageReference Include="RASMapperLibDistro6.2" Version="0.0.1" />
+	  <Reference Include="System.Windows.Forms" /> <!--Comes Along Because Of RASMapper-->
   </ItemGroup>
 
 	
   <ItemGroup>
     <ProjectReference Include="..\Statistics\Statistics.csproj" />
-  </ItemGroup>
-
-	
-  <ItemGroup>
-    <Reference Include="Ras.Mapper">
-      <HintPath>..\..\ras-ui\Ras.Mapper\bin\Debug\net6.0\Ras.Mapper.dll</HintPath> <!--do something better here-->
-    </Reference>
-	  <Reference Include="H5Assist">
-		  <HintPath>..\..\ras-ui\Ras.Mapper\bin\Debug\net6.0\H5Assist.dll</HintPath><!--do something better here-->
-	  </Reference>
   </ItemGroup>
 
 </Project>
