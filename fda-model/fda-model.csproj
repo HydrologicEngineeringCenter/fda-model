@@ -33,9 +33,5 @@
 		  <HintPath>..\..\ras-ui\Ras.Mapper\bin\Debug\net6.0\H5Assist.dll</HintPath><!--do something better here-->
 	  </Reference>
   </ItemGroup>
-	
-  <ItemGroup>
-    <Folder Include="structures\" />
-  </ItemGroup>
 
 </Project>
