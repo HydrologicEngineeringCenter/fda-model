@@ -167,7 +167,19 @@ namespace Statistics.Histograms
             _BinCounts = new Int32[numberOfBins];
             _ConvergenceCriteria = _c;
         }
-        private Histogram(double min, double max, double binWidth, int sampleSize, Int32[] binCounts, ConvergenceCriteria convergenceCriteria)
+        public Histogram(List<double> dataList, ConvergenceCriteria convergenceCriteria)
+        {
+            double[] data = dataList.ToArray();
+            _ConvergenceCriteria = convergenceCriteria;
+            Min = data.Min();
+            Max = data.Max();
+            int quantityOfBins = (int)Math.Ceiling(1 + 3.322 * Math.Log10(data.Length));
+            double range = Max - Min;
+             _BinWidth = range / quantityOfBins;
+            _BinCounts = new long[quantityOfBins];
+            AddObservationsToHistogram(data);
+        }
+        private Histogram(double min, double max, double binWidth, Int64 sampleSize, Int64[] binCounts, ConvergenceCriteria convergenceCriteria)
         {
             Min = min;
             Max = max;
