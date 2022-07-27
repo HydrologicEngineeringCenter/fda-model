@@ -9,7 +9,7 @@ using Statistics.Histograms;
 
 namespace metrics
 {
-    public class AlternativeResults : Validation, IReportMessage
+    public class AlternativeResults : HEC.MVVMFramework.Base.Implementations.Validation, IReportMessage
     {
         #region Fields
         private int _alternativeID;
@@ -30,7 +30,6 @@ namespace metrics
             }
         }
         public List<int> AnalysisYears { get; }
-        public int PeriodOfAnalysis { get; }
         public event MessageReportedEventHandler MessageReport;
         public bool IsNull
         {
@@ -49,50 +48,24 @@ namespace metrics
             _isNull = true;
             _alternativeID = 0;
             _aaeqResults = new ConsequenceDistributionResults();
-            BaseYearScenarioResults = new ScenarioResults();
-            FutureYearScenarioResults = new ScenarioResults();
-            AnalysisYears = new List<int>() { 2030, 2049 };
-            PeriodOfAnalysis = 50;
-            AddRules();
         }
-
-
-
-        public AlternativeResults(int id, List<int> analysisYears, int periodOfAnalysis)
-        {
-            _alternativeID = id;
-            PeriodOfAnalysis = periodOfAnalysis;
-            _aaeqResults = new ConsequenceDistributionResults(false);
-            _isNull = false;
-            AnalysisYears = analysisYears;
-            AddRules();
-        }
-        internal AlternativeResults(int id, List<int> analysisYears, int periodOfAnalysis, bool isNull)
+        public AlternativeResults(int id, List<int> analysisYears)
         {
             _alternativeID = id;
             _aaeqResults = new ConsequenceDistributionResults();
-            _isNull = isNull;
+            _isNull = false;
             AnalysisYears = analysisYears;
-            PeriodOfAnalysis = periodOfAnalysis;
-            AddRules();
         }
-        private AlternativeResults(int id, ConsequenceDistributionResults consequenceResults, List<int> analysisYears, int periodOfAnalysis)
+        private AlternativeResults(int id, ConsequenceDistributionResults consequenceResults, List<int> analysisYears)
         {
             _alternativeID = id;
             _aaeqResults = consequenceResults;
-            PeriodOfAnalysis = periodOfAnalysis;
             _isNull = false;
             AnalysisYears = analysisYears;
-            AddRules();
 
         }
         #endregion
         #region Methods
-        private void AddRules()
-        {
-            AddSinglePropertyRule(nameof(AnalysisYears), new Rule(() => AnalysisYears[1] - AnalysisYears[0] >= 1, "The most likely future year must be at least 1 year greater then the base year"));
-            AddSinglePropertyRule(nameof(PeriodOfAnalysis), new Rule(() => PeriodOfAnalysis >= Math.Abs(AnalysisYears[0] - AnalysisYears[1]) + 1, "The period of analysis must be greater than or equal to the difference between the analysis years, inclusive."));
-        }
         public List<int> GetImpactAreaIDs()
         {
             List<int> impactAreaIDs = new List<int>();

@@ -59,60 +59,7 @@ namespace alternativeComparisonReport
             }
             return damagesReducedAllAlternatives;
         }
-        
-        private static ConsequenceDistributionResult IterateOnConsequenceDistributionResult(ConsequenceDistributionResult withProjectDamageResult, ConsequenceDistributionResult withoutProjectDamageResult, interfaces.IProvideRandomNumbers randomProvider, bool iterateOnWithProject = true)
-        {//TODO rename local variables to reflect generalization of this extracted logic 
-            IHistogram withoutProjectHistogram = withoutProjectDamageResult.ConsequenceHistogram;
-            IHistogram withProjectHistogram = withProjectDamageResult.ConsequenceHistogram;
-            ConsequenceDistributionResult damageReducedResult = new ConsequenceDistributionResult();
-            ConvergenceCriteria convergenceCriteria;
-            bool bothHistogramsAreZeroValued = withoutProjectHistogram.HistogramIsZeroValued && withProjectHistogram.HistogramIsZeroValued;
-            if (!bothHistogramsAreZeroValued)
-            {
-                if (iterateOnWithProject)
-                {
-                    convergenceCriteria = withProjectDamageResult.ConvergenceCriteria;
-                }
-                else
-                {
-                    convergenceCriteria = withoutProjectDamageResult.ConvergenceCriteria;
-                }
-                List<double> resultCollection = new List<double>();
-                Int64 iterations = convergenceCriteria.MinIterations;
-                bool converged = false;
 
-                while (!converged)
-                {
-                    for (int i = 0; i < iterations; i++) 
-                    {
-                        double withProjectDamage = withProjectHistogram.InverseCDF(randomProvider.NextRandom());
-                        double withoutProjectDamage = withoutProjectHistogram.InverseCDF(randomProvider.NextRandom());
-                        double damagesReduced = withoutProjectDamage - withProjectDamage;
-                        resultCollection.Add(damagesReduced);
-                    }
-                    Histogram histogram = new Histogram(resultCollection, convergenceCriteria);
-                    converged = histogram.IsHistogramConverged(.95, .05);
-                    if (!converged)
-                    {
-                        iterations = histogram.EstimateIterationsRemaining(.95, .05);
-                    }
-                    else
-                    {
-                        if (iterateOnWithProject)
-                        {
-                            damageReducedResult = new ConsequenceDistributionResult(withProjectDamageResult.DamageCategory, withProjectDamageResult.AssetCategory, histogram, withProjectDamageResult.RegionID);
-                        }
-                        else
-                        {
-                            damageReducedResult = new ConsequenceDistributionResult(withoutProjectDamageResult.DamageCategory, withoutProjectDamageResult.AssetCategory, histogram, withoutProjectDamageResult.RegionID);
-                        }
-                        iterations = 0;
-                        break;
-                    }
-                }
-            }
-            return damageReducedResult;
-        }
 
         private static List<ConsequenceDistributionResults> ComputeDistributionEADReducedBaseYear(interfaces.IProvideRandomNumbers randomProvider, ConvergenceCriteria convergenceCriteria, AlternativeResults withoutProjectAlternativeResults, List<AlternativeResults> withProjectAlternativesResults)
         {
