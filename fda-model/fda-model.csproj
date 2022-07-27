@@ -17,21 +17,12 @@
 	
   <ItemGroup>
     <PackageReference Include="HEC.MVVMFramework.Model" Version="1.0.0-alpha-2022.2.15.2147" />
+    <PackageReference Include="Ras.Mapper" Version="1.0.16-beta-ga8c2e0e183" />
   </ItemGroup>
 
 	
   <ItemGroup>
     <ProjectReference Include="..\Statistics\Statistics.csproj" />
-  </ItemGroup>
-
-	
-  <ItemGroup>
-    <Reference Include="Ras.Mapper">
-      <HintPath>..\..\ras-ui\Ras.Mapper\bin\Debug\net6.0\Ras.Mapper.dll</HintPath> <!--do something better here-->
-    </Reference>
-	  <Reference Include="H5Assist">
-		  <HintPath>..\..\ras-ui\Ras.Mapper\bin\Debug\net6.0\H5Assist.dll</HintPath><!--do something better here-->
-	  </Reference>
   </ItemGroup>
 
 </Project>
